@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prathibha High School - Fee Management System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#222;}
+:root{--blue:#1565c0;--blue-light:#1976d2;--blue-dark:#0d47a1;--accent:#ffd600;--green:#2e7d32;--red:#c62828;--orange:#e65100;}
+
+/* LOGIN */
+#loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d47a1,#1976d2);}
+.login-box{background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.login-logo{text-align:center;margin-bottom:18px;}
+.login-logo img{height:90px;border-radius:8px;}
+.login-school{text-align:center;margin-bottom:24px;}
+.login-school h2{color:var(--blue-dark);font-size:1.3rem;font-weight:700;}
+.login-school p{color:#555;font-size:0.82rem;}
+.role-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.role-tab{flex:1;padding:8px;border:2px solid #ddd;border-radius:8px;background:#f9f9f9;cursor:pointer;font-size:0.82rem;text-align:center;transition:all .2s;}
+.role-tab.active{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:600;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:0.82rem;color:#555;margin-bottom:6px;font-weight:500;}
+.form-group input,.form-group select{width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:0.9rem;outline:none;transition:border .2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue);}
+.btn-login{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.btn-login:hover{background:var(--blue-dark);}
+.login-hint{margin-top:14px;background:#e3f2fd;border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#1565c0;}
+.login-hint b{display:block;margin-bottom:4px;}
+
+/* MAIN APP */
+#app{display:none;flex-direction:row;min-height:100vh;}
+.sidebar{width:240px;background:var(--blue-dark);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s;}
+.sidebar-logo{padding:16px;border-bottom:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;gap:10px;}
+.sidebar-logo img{height:48px;border-radius:6px;}
+.sidebar-logo-text{font-size:0.82rem;font-weight:700;line-height:1.3;}
+.sidebar-user{padding:10px 16px;background:rgba(255,255,255,0.08);font-size:0.8rem;}
+.sidebar-user span{display:block;font-weight:600;}
+.sidebar-user small{opacity:.7;}
+nav{flex:1;overflow-y:auto;padding:8px 0;}
+nav a{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.82);text-decoration:none;font-size:0.88rem;cursor:pointer;transition:background .15s;}
+nav a:hover,nav a.active{background:rgba(255,255,255,.13);color:#fff;}
+nav a .nav-icon{width:20px;text-align:center;font-size:1.1rem;}
+.nav-section{padding:10px 20px 4px;font-size:0.7rem;opacity:.5;text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+.sidebar-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.1);}
+.btn-logout{width:100%;padding:8px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:7px;cursor:pointer;font-size:0.85rem;}
+.btn-logout:hover{background:rgba(255,255,255,.2);}
+
+.main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;}
+.top-header{background:#fff;border-bottom:1.5px solid #e0e0e0;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.header-title{font-size:1.05rem;font-weight:700;color:var(--blue-dark);}
+.header-school{font-size:0.75rem;color:#666;}
+.header-right{display:flex;align-items:center;gap:16px;}
+.badge{display:inline-block;background:var(--blue);color:#fff;border-radius:20px;padding:3px 11px;font-size:0.75rem;font-weight:600;}
+
+.page-content{padding:24px 28px;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+.page-title{font-size:1.25rem;font-weight:700;color:var(--blue-dark);margin-bottom:20px;}
+
+/* CARDS */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:#fff;border-radius:12px;padding:20px;border-left:4px solid var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.stat-card.green{border-color:var(--green);}
+.stat-card.red{border-color:var(--red);}
+.stat-card.orange{border-color:var(--orange);}
+.stat-card h3{font-size:0.8rem;color:#777;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.stat-card .value{font-size:1.6rem;font-weight:700;color:#111;}
+.stat-card .sub{font-size:0.78rem;color:#888;margin-top:4px;}
+
+/* TABLE */
+.table-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden;margin-bottom:20px;}
+.table-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.table-header h3{font-size:1rem;font-weight:700;color:#111;}
+table{width:100%;border-collapse:collapse;}
+th{background:#f5f7ff;padding:10px 14px;text-align:left;font-size:0.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px;}
+td{padding:10px 14px;border-bottom:1px solid #f5f5f5;font-size:0.87rem;color:#333;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafbff;}
+
+/* STATUS BADGES */
+.status{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;}
+.status.paid{background:#e8f5e9;color:#2e7d32;}
+.status.partial{background:#fff3e0;color:#e65100;}
+.status.unpaid{background:#ffebee;color:#c62828;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all .15s;}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:var(--blue-dark);}
+.btn-success{background:var(--green);color:#fff;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-sm{padding:5px 11px;font-size:0.78rem;}
+.btn-outline{background:#fff;border:1.5px solid var(--blue);color:var(--blue);}
+.btn-outline:hover{background:#e3f2fd;}
+
+/* FORM */
+.form-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px;}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+.form-field{display:flex;flex-direction:column;gap:5px;}
+.form-field label{font-size:0.8rem;font-weight:600;color:#444;}
+.form-field input,.form-field select,.form-field textarea{padding:9px 12px;border:1.5px solid #ddd;border-radius:7px;font-size:0.87rem;outline:none;transition:border .2s;}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--blue);}
+
+/* FEE DETAIL */
+.fee-detail-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px;}
+.fee-bar-wrap{margin:8px 0;}
+.fee-bar{height:12px;background:#e3f2fd;border-radius:6px;overflow:hidden;margin-top:4px;}
+.fee-bar-fill{height:100%;background:var(--blue);border-radius:6px;transition:width .6s;}
+.fee-bar-fill.red{background:var(--red);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;padding:28px;max-width:560px;width:95%;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.modal-title{font-size:1.1rem;font-weight:700;color:var(--blue-dark);margin-bottom:18px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.search-bar input,.search-bar select{padding:8px 12px;border:1.5px solid #ddd;border-radius:7px;font-size:0.85rem;outline:none;}
+.search-bar input:focus,.search-bar select:focus{border-color:var(--blue);}
+
+/* RECEIPT */
+.receipt{background:#fff;border:2px solid #1565c0;border-radius:12px;padding:24px;max-width:500px;margin:0 auto;}
+.receipt-header{text-align:center;border-bottom:2px dashed #bbb;padding-bottom:14px;margin-bottom:14px;}
+.receipt-header img{height:60px;}
+.receipt-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:0.87rem;}
+.receipt-total{font-weight:700;color:var(--blue-dark);margin-top:8px;}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:24px;}
+.chart-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.chart-card h3{font-size:0.92rem;font-weight:700;margin-bottom:14px;color:#111;}
+
+/* TERM BADGES */
+.term-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:0.76rem;font-weight:700;white-space:nowrap;}
+.term-paid{background:#dcfce7;color:#166534;border:1.5px solid #86efac;}
+.term-partial{background:#fef9c3;color:#854d0e;border:1.5px solid #fde047;}
+.term-unpaid{background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;}
+.term-na{background:#f3f4f6;color:#9ca3af;border:1.5px solid #d1d5db;}
+
+/* PAYMENT MODE CARDS */
+.pay-mode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:8px;}
+.pay-mode-card{border:2px solid #e0e0e0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .18s;background:#fff;}
+.pay-mode-card:hover{border-color:#1565c0;background:#f0f6ff;transform:translateY(-2px);box-shadow:0 3px 10px rgba(21,101,192,.13);}
+.pay-mode-card.active{border-color:#1565c0;background:#e3f2fd;box-shadow:0 3px 12px rgba(21,101,192,.18);}
+.pay-mode-icon{font-size:1.5rem;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;}
+.pay-mode-label{font-size:0.76rem;font-weight:600;color:#333;}
+.pay-mode-card.active .pay-mode-label{color:#1565c0;}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:#323232;color:#fff;padding:12px 20px;border-radius:8px;font-size:0.88rem;z-index:500;display:none;animation:slideIn .3s ease;}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:8px;font-size:0.87rem;margin-bottom:16px;}
+.alert-info{background:#e3f2fd;color:#0d47a1;border-left:4px solid #1976d2;}
+.alert-warning{background:#fff3e0;color:#e65100;border-left:4px solid #ff9800;}
+.alert-success{background:#e8f5e9;color:#2e7d32;border-left:4px solid #4caf50;}
+
+@media print{
+  .sidebar,.top-header,.form-card,.no-print{display:none!important;}
+  .main-content{margin-left:0!important;}
+  .receipt{border:2px solid #1565c0;max-width:100%;}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .main-content{margin-left:0;}
+  .stat-cards{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <img id="loginLogo" src="" alt="Prathibha High School Logo">
+    </div>
+    <div class="login-school">
+      <h2 id="loginSchoolName">Prathibha High School</h2>
+      <p id="loginSchoolAddress">38-40-49 Main Road, Marripalem, Visakhapatnam – 530018</p>
+      <p style="margin-top:4px;font-size:0.75rem;color:#888;">Fee Management System</p>
+    </div>
+    <div class="role-tabs">
+      <div class="role-tab active" onclick="selectRole('principal')">🏫 Principal</div>
+      <div class="role-tab" onclick="selectRole('teacher')">👩‍🏫 Teacher</div>
+      <div class="role-tab" onclick="selectRole('parent')">👨‍👩‍👧 Parent</div>
+    </div>
+    <div class="form-group">
+      <label>Email / Username</label>
+      <input type="text" id="loginEmail" placeholder="Enter your email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter your password">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Login →</button>
+    <div class="login-hint">
+      <b>Demo Credentials:</b>
+      Principal: principal@prathibha.edu / admin123<br>
+      Teacher: teacher@prathibha.edu / teacher123<br>
+      Parent: parent@prathibha.edu / parent123
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img id="sidebarLogo" src="" alt="Logo">
+      <div class="sidebar-logo-text">Prathibha<br>High School</div>
+    </div>
+    <div class="sidebar-user">
+      <span id="userName">Principal</span>
+      <small id="userRole">Administrator</small>
+    </div>
+    <nav id="mainNav">
+      <a onclick="showPage('dashboard')" class="active"><span class="nav-icon">📊</span> Dashboard</a>
+      <div class="nav-section">Students</div>
+      <a onclick="showPage('students')"><span class="nav-icon">👩‍🎓</span> Students</a>
+      <a onclick="showPage('addStudent')" id="navAddStudent"><span class="nav-icon">➕</span> Add Student</a>
+      <div class="nav-section">Fees</div>
+      <a onclick="showPage('feeStructure')" id="navFeeStr"><span class="nav-icon">📋</span> Fee Structure</a>
+      <a onclick="showPage('feePayments')"><span class="nav-icon">💳</span> Fee Payments</a>
+      <a onclick="showPage('recordPayment')" id="navRecordPay"><span class="nav-icon">✏️</span> Record Payment</a>
+      <div class="nav-section">Reports</div>
+      <a onclick="showPage('reports')"><span class="nav-icon">📈</span> Reports</a>
+      <a onclick="showPage('receiptGen')" id="navReceipt"><span class="nav-icon">🧾</span> Fee Receipt</a>
+      <div class="nav-section">Admin</div>
+      <a onclick="showPage('settings')" id="navSettings"><span class="nav-icon">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="top-header">
+      <div>
+        <div class="header-title" id="headerSchoolName">Prathibha High School</div>
+        <div class="header-school" id="headerSchoolAddress">38-40-49 Main Road, Marripalem, Visakhapatnam – 530018 | Academic Year: 2024–25</div>
+      </div>
+      <div class="header-right">
+        <span class="badge" id="headerRole">Principal</span>
+        <strong id="headerUser" style="font-size:0.9rem;">Admin</strong>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">📊 Dashboard</div>
+        <div class="stat-cards" id="statCards"></div>
+
+        <!-- TERM SUMMARY CARDS -->
+        <div style="margin-bottom:8px;font-size:0.95rem;font-weight:700;color:#0d47a1;">📅 Term-wise Fee Summary</div>
+        <div class="stat-cards" id="termStatCards" style="margin-bottom:24px;"></div>
+
+        <!-- STUDENT TERM STATUS TABLE -->
+        <div class="table-card" style="margin-bottom:24px;">
+          <div class="table-header" style="justify-content:space-between;">
+            <h3>🎓 Student Term Payment Status</h3>
+            <div class="search-bar">
+              <input type="text" id="dashSearch" placeholder="🔍 Search student..." oninput="filterDashTable()">
+              <select id="dashClassFilter" onchange="filterDashTable()"><option value="">All Classes</option></select>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Adm No</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th style="background:#dbeafe;color:#1e40af;">📘 Term 1</th>
+                <th style="background:#dcfce7;color:#166534;">📗 Term 2</th>
+                <th style="background:#fef9c3;color:#854d0e;">📙 Term 3</th>
+                <th>Total Paid</th>
+                <th>Balance</th>
+                <th>Overall</th>
+              </tr>
+            </thead>
+            <tbody id="dashTermTbody"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card"><h3>Monthly Collection (₹)</h3><canvas id="monthlyChart" height="180"></canvas></div>
+          <div class="chart-card"><h3>Class-wise Collection (₹)</h3><canvas id="classwiseChart" height="180"></canvas></div>
+          <div class="chart-card"><h3>Term-wise Collection (₹)</h3><canvas id="termChart" height="180"></canvas></div>
+          <div class="chart-card"><h3>Payment Status Overview</h3><canvas id="statusChart" height="180"></canvas></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header" style="justify-content:space-between;">
+            <h3>🕐 Recent Payments</h3>
+            <span id="recentPayCount" style="font-size:0.8rem;color:#888;"></span>
+          </div>
+          <div style="overflow-x:auto;">
+          <table id="recentPaymentsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Adm No</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th>Term</th>
+                <th>Amount Paid</th>
+                <th>Balance After</th>
+                <th>Date</th>
+                <th>Mode</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody id="recentPaymentsTbody"></tbody>
+          </table>
+          </div>
+          <div style="padding:10px 20px;font-size:0.8rem;color:#888;border-top:1px solid #f0f0f0;">
+            Showing last 10 payments · <a onclick="showPage('feePayments')" style="color:#1565c0;cursor:pointer;text-decoration:underline;">View all fee status →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="page" id="page-students">
+        <div class="page-title">👩‍🎓 Student Management</div>
+        <div class="table-card">
+          <div class="table-header">
+            <h3>All Students</h3>
+            <div class="search-bar">
+              <input type="text" id="stuSearch" placeholder="🔍 Search name / adm no..." oninput="filterStudents()">
+              <select id="stuClassFilter" onchange="filterStudents()">
+                <option value="">All Classes</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="showPage('addStudent')">+ Add</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Adm No</th><th>Name</th><th>Father</th><th>Class</th><th>Mobile</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="studentsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD STUDENT -->
+      <div class="page" id="page-addStudent">
+        <div class="page-title" id="addStudentTitle">➕ Add New Student</div>
+        <div class="form-card">
+          <div class="form-grid">
+            <div class="form-field"><label>Admission Number*</label><input type="text" id="fAdmNo" placeholder="e.g. PHS001"></div>
+            <div class="form-field"><label>Student Name*</label><input type="text" id="fStuName" placeholder="Full Name"></div>
+            <div class="form-field"><label>Father Name</label><input type="text" id="fFather" placeholder="Father's Name"></div>
+            <div class="form-field"><label>Mother Name</label><input type="text" id="fMother" placeholder="Mother's Name"></div>
+            <div class="form-field"><label>Class*</label>
+              <select id="fClass">
+                <option value="">Select Class</option>
+                <option>Nursery</option><option>LKG</option><option>UKG</option>
+                <option>1st</option><option>2nd</option><option>3rd</option><option>4th</option>
+                <option>5th</option><option>6th</option><option>7th</option>
+                <option>8th</option><option>9th</option><option>10th</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Section</label><input type="text" id="fSection" placeholder="A / B / C"></div>
+            <div class="form-field"><label>Mobile Number</label><input type="text" id="fMobile" placeholder="10-digit mobile"></div>
+            <div class="form-field"><label>Admission Date</label><input type="date" id="fAdmDate"></div>
+            <div class="form-field"><label>Academic Year</label>
+              <select id="fAcYear"><option>2023-24</option><option>2024-25</option><option>2025-26</option></select>
+            </div>
+            <div class="form-field" style="grid-column:1/-1"><label>Address</label><textarea id="fAddress" rows="2" placeholder="Full address"></textarea></div>
+          </div>
+          <div style="margin-top:18px;display:flex;gap:12px;">
+            <button class="btn btn-primary" onclick="saveStudent()">💾 Save Student</button>
+            <button class="btn btn-outline" onclick="showPage('students')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEE STRUCTURE -->
+      <div class="page" id="page-feeStructure">
+        <div class="page-title">📋 Fee Structure</div>
+        <div class="form-card" id="feeStrForm">
+          <h3 style="margin-bottom:14px;font-size:1rem;">Set / Update Fee Structure</h3>
+          <div class="form-grid">
+            <div class="form-field"><label>Class</label>
+              <select id="fsClass" onchange="loadFeeStr()">
+                <option value="">Select Class</option>
+                <option>Nursery</option><option>LKG</option><option>UKG</option>
+                <option>1st</option><option>2nd</option><option>3rd</option><option>4th</option>
+                <option>5th</option><option>6th</option><option>7th</option>
+                <option>8th</option><option>9th</option><option>10th</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Annual Fee (₹)</label><input type="number" id="fsAnnual" placeholder="e.g. 30000" oninput="autoSplitFees()"></div>
+            <div class="form-field"><label>Term 1 Fee (₹)</label><input type="number" id="fsTerm1" placeholder="Auto-calculated"></div>
+            <div class="form-field"><label>Term 2 Fee (₹)</label><input type="number" id="fsTerm2" placeholder="Auto-calculated"></div>
+            <div class="form-field"><label>Term 3 Fee (₹)</label><input type="number" id="fsTerm3" placeholder="Auto-calculated"></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="saveFeeStr()">💾 Save Structure</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>All Fee Structures</h3></div>
+          <table>
+            <thead><tr><th>Class</th><th>Annual Fee</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th>Monthly</th><th>Actions</th></tr></thead>
+            <tbody id="feeStrTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FEE PAYMENTS -->
+      <div class="page" id="page-feePayments">
+        <div class="page-title">💳 Fee Payment Status</div>
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Student Fee Details</h3>
+            <div class="search-bar">
+              <input type="text" id="feeSearch" placeholder="🔍 Search student..." oninput="filterFeeTable()">
+              <select id="feeClassFilter" onchange="filterFeeTable()"><option value="">All Classes</option></select>
+              <select id="feeStatusFilter" onchange="filterFeeTable()">
+                <option value="">All Status</option>
+                <option>Fully Paid</option><option>Partially Paid</option><option>Not Paid</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Adm No</th><th>Name</th><th>Class</th><th>Annual Fee</th><th>Paid</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="feeTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RECORD PAYMENT -->
+      <div class="page" id="page-recordPayment">
+        <div class="page-title">✏️ Record Fee Payment</div>
+        <div class="form-card">
+          <div class="form-grid">
+            <div class="form-field"><label>Select Student*</label>
+              <select id="rpStudent" onchange="loadStudentFeeInfo()">
+                <option value="">Choose Student</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Term*</label>
+              <select id="rpTerm">
+                <option value="">Select Term</option>
+                <option value="Term 1">Term 1</option>
+                <option value="Term 2">Term 2</option>
+                <option value="Term 3">Term 3</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Amount Paid (₹)*</label><input type="number" id="rpAmount" placeholder="Amount"></div>
+            <div class="form-field"><label>Payment Date*</label><input type="date" id="rpDate"></div>
+            <div class="form-field" style="grid-column:1/-1;">
+              <label>Payment Mode*</label>
+              <input type="hidden" id="rpMode" value="Cash">
+              <div class="pay-mode-grid" id="payModeGrid">
+                <div class="pay-mode-card active" onclick="selectPayMode(this,'Cash')">
+                  <div class="pay-mode-icon" style="background:#e8f5e9;">💵</div>
+                  <div class="pay-mode-label">Cash</div>
+                </div>
+                <div class="pay-mode-card" onclick="selectPayMode(this,'GPay')">
+                  <div class="pay-mode-icon" style="background:#e8f0fe;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/120px-Google_Pay_Logo.svg.png" style="height:28px;object-fit:contain;" onerror="this.outerHTML='🟢'"></div>
+                  <div class="pay-mode-label">GPay</div>
+                </div>
+                <div class="pay-mode-card" onclick="selectPayMode(this,'PhonePe')">
+                  <div class="pay-mode-icon" style="background:#ede7f6;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Phonepe-logo.svg/120px-Phonepe-logo.svg.png" style="height:28px;object-fit:contain;" onerror="this.outerHTML='🟣'"></div>
+                  <div class="pay-mode-label">PhonePe</div>
+                </div>
+                <div class="pay-mode-card" onclick="selectPayMode(this,'UPI')">
+                  <div class="pay-mode-icon" style="background:#fff3e0;">📲</div>
+                  <div class="pay-mode-label">UPI</div>
+                </div>
+                <div class="pay-mode-card" onclick="selectPayMode(this,'Credit Card')">
+                  <div class="pay-mode-icon" style="background:#fce4ec;">💳</div>
+                  <div class="pay-mode-label">Credit Card</div>
+                </div>
+                <div class="pay-mode-card" onclick="selectPayMode(this,'Debit Card')">
+                  <div class="pay-mode-icon" style="background:#e3f2fd;">🏧</div>
+                  <div class="pay-mode-label">Debit Card</div>
+                </div>
+                <div class="pay-mode-card" onclick="selectPayMode(this,'Bank Transfer')">
+                  <div class="pay-mode-icon" style="background:#e0f2f1;">🏦</div>
+                  <div class="pay-mode-label">Bank Transfer</div>
+                </div>
+                <div class="pay-mode-card" onclick="selectPayMode(this,'Cheque')">
+                  <div class="pay-mode-icon" style="background:#f3e5f5;">📝</div>
+                  <div class="pay-mode-label">Cheque</div>
+                </div>
+              </div>
+              <div id="selectedModeLabel" style="margin-top:8px;font-size:0.82rem;color:#1565c0;font-weight:600;">✅ Selected: Cash</div>
+            </div>
+            <div class="form-field"><label>Remarks</label><input type="text" id="rpRemarks" placeholder="Optional remarks"></div>
+          </div>
+          <div id="studentFeeInfo" style="margin-top:16px;display:none;"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="recordPayment()">✅ Record Payment</button>
+            <button class="btn btn-outline" onclick="showPage('feePayments')">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="page-title">📈 Reports</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;" id="reportBtns">
+          <button id="rbtn-pending"   class="btn btn-primary" onclick="showReport('pending')">⏳ Pending Fee</button>
+          <button id="rbtn-paid"      class="btn btn-outline" onclick="showReport('paid')">✅ Fully Paid</button>
+          <button id="rbtn-classwise" class="btn btn-outline" onclick="showReport('classwise')">🏫 Class-wise</button>
+          <button id="rbtn-termwise"  class="btn btn-outline" onclick="showReport('termwise')">📅 Term-wise</button>
+          <button class="btn btn-success" onclick="exportReport()">📥 Export</button>
+        </div>
+        <div id="reportOutput"></div>
+      </div>
+
+      <!-- RECEIPT -->
+      <div class="page" id="page-receiptGen">
+        <div class="page-title">🧾 Fee Receipt Generator</div>
+        <div class="form-card">
+          <div class="form-grid">
+            <div class="form-field"><label>Select Student</label>
+              <select id="recStudent" onchange="previewReceipt()">
+                <option value="">Choose Student</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Select Payment</label>
+              <select id="recPayment" onchange="updateReceiptPayment()">
+                <option value="">Choose Payment</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="receiptPreview" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-title">⚙️ Settings</div>
+        <div id="settingsContent"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT VIEW MODAL -->
+<div class="modal-overlay" id="studentModal">
+  <div class="modal">
+    <div class="modal-title">👩‍🎓 Student Profile</div>
+    <div id="studentModalContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('studentModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// DATA STORE
+// ============================================================
+const LOGO_B64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAYGBgYHBgcICAcKCwoLCg8ODAwODxYQERAREBYiFRkVFRkVIh4kHhweJB42KiYmKjY+NDI0PkxERExfWl98fKcBBgYGBgcGBwgIBwoLCgsKDw4MDA4PFhAREBEQFiIVGRUVGRUiHiQeHB4kHjYqJiYqNj40MjQ+TERETF9aX3x8p//CABEIAKABJQMBIgACEQEDEQH/xAAxAAEAAgMBAAAAAAAAAAAAAAAABAUBAwYCAQEAAwEBAAAAAAAAAAAAAAAAAQIDBAX/2gAMAwEAAhADEAAAAuqAAAAAAAAYgErwkGPWn2ewAAAAAAAAABAAJAAAaNWN6dwRjyg0tNzH81mZmFMvXItAQACQAAADCsrNm5jPP19Nmptd+bIvQADxBsK+s2KD7mMb40yt8srZ6G6PW8ljVNdmOd1cvb0/rkeq259o1yCQAA0ZN1RYwuXTnJUSznv020zO+EhjO/GAEMQ5kLK9Zb0nRZdOrfAm9XJ7edSNnjOyJ10HRec9eY09Zx+PXr7Tl+jz55OYu3XDaOuoBiMiVX7o3Nb3ugzfG2hR7jx6lJbz67swAMFfnaXQ7rHn6o9ojdXNSxI+/XouJqVTlyx4V2PPpOOX6nxjeLmVX+RfxNr93ZSyQPfp4TBXRyvVclfKfspOg35fEnzK87u4i8pe19BxnacjeVXClk5TYqqPEXdHY8heelr7GstHUVEf1nevu6i9acr2/C3OuHQcffU0OilU2qi+eamk29dAt8pgJtb2cUKfSXcXvBj0qK9wjiOuq7S9JWM4z04TpuZ7bpiLqtKrJX3VVY2mPSTtd4uea6bl4dPSXFbCZW2sdOLSFXZa13X8l1e2PPepcOzoOa6vlqOjg58Vmk7Pk+stGylu6vKKPqM7pjIrcDDKDGUuevdeiYnw8YifM2LsKjbIkWjFfZ6YnZqxiHtqkS118+NFt/jbLmm2uzqibOs3eSXVyvMtdhqmDGUAAAAAKjRbRyhnWiFNMle5Uvu0kFfVdNqOfk3Wkp/Vt6KLF7vOV6P3vKDZbeTntt95OflXGCrvYsoAAAAAAAAAAAePYj11zgo99rkodtzghwbsUU+cKfzdCmtNoAAA/8QAAv/aAAwDAQACAAMAAAAhAAAAAAAAIMgAAAAAAAAAACCAAAAEAhPsACCAAAAAMMiAAALN+zoLbDCAAAH+aNIAC7/gOKHLkiAAKYLfIAAsLjv9NIA0VJAHVOqjADgxmCndtGmB9AWmWCpeqnxE+v3H4PkFAAiQbQOL6a06zGCg4QAAAAA8a4oUAkYwgUMoAAAAAAAAAAAQQgEQgAwAAA//xAAC/9oADAMBAAIAAwAAABDzzzzzzzyUhnTzzzzzzzzz77zzzxry3X/zLrzzzzxnV3zzzlma9Umbv7zzzmekpzzLX7Pt4Nv2LzzhzcvTzz9Fi2ZHzLYf3xF/tAfT+t/EyXF3wgT/AMKdOHr8h+WrHS4RixxM88e8gogFsKQi4CqGc888888IwAksEsk0s8c8888888888884EokcM8E488//xAAxEQACAQMDAgQFAgcBAAAAAAABAgMABBEFEiETQQYQIjEUIDJRcSNSFiUwQEJQYZL/2gAIAQIBAT8A/u+2fKa4ZZBFCm+Qjn7D81/M1BP6LD9oyKgnWZM4II4YHyz89zK0ULOoBx2NHxE4ODbD/wBVa3cVzEHQ/kfJLMIgC30kgZrqIfZgc+2DVsoCu5wWdjk+RXZdqR/kvNTzxwRtI7YAqTxBOXOyFcds1pl5PdI7Soox7YofJqeqW2mwCafdt3Y4qXxtos6mFWkBbgEjioLJbx1w+0EZBHINWWkPay71ueO4x8msuiafPuYDIwv5rwxHIbeR2bIBwtBAi4Gfes0qHqM5xyMCr7TmvHG6YhF9lAq40lLba3ULAn2qTxXYaS7QurO3cL2rRPE1tq8rRxQSIVGcnzSN3OFBJrxlYXraSStuxCuCfxVnoU+pXfRtyivtJO6vDeia1pzhbpo3iA9OCciue48768+FiLBd7HhVprDUdVdZLjEUQHC1a2yQRJDGAAABWxFA3CmxuPBFY/55avZ3d1blLaVUcjAJrWfCt3p6pPPcJJvfnFeAdKvHlmnjhPS27Q1S200X1rjy08kTHB7U80JQrORhhgg1/D1rYa2byzdek6nK/tNajcSQ21i0bYYrk1qaJNDaMqATOvIFSWlxGjM8ZAUgE1HazSfQueM4qy0uK7iuWlUfprlc/erdc6Tc+nJDgCjazxBHeMhT7GmZ/RyDzWp2U01zCqKBujGO1aZE8OoGKReQGBBo2dzJ1ZEiJUE5pELkjIGByTWtaA161mk52Q7t5YdxVk9hawpb2wChRgACr0kxEk5JPlHK0bhlq7mWWNCPfvQrV2221j6RkJVnI8l7AWbJ3jk1qJkk1KaLecNIBVpFFbaqITETtX6iferPmPU9o7HAq23rpF0c4/UFRySDR5S5JBkAXNIPQDnvWqmQ3Voy8rtTbSSiTWGZcHCEZrSpJPj5jlsAMWFJAptprnYXO8gD7VqRzZ2J27fQeKgcJKrEnAq4uGlY/t7fLNczzBA75CjAFKxRgVOCORTySO+9mO73zRv7zer9X1DjNJczxmQq+C4w1CWUI0e87WOSK60hiERb0g5xQbAIr4ifp9PqNt+1RyPGxZGIJ70kssbMVbBPBNRzzRqyo5Ab3FSTTSKqu5IX2/oY/wBF/8QALhEAAgEDAwIFAwMFAAAAAAAAAQIDAAQRBRIhEDEGICJBURMUMEJxgTJAUFJh/9oACAEDAQE/APwAZz0x6c/2PaPgdzz0trZpQzM4RB3Y19Ow7CeQH5K8VNC0TAEggjII7H8NvCZpkjzjdxmk8HXLqGW5jq/0+5sZzFMv7H2PkgQSbkJPYkfvQjc5G08d6nYIkaZ7J2/6eivvtXU/oYFf5qKN5XVEXLMcACofBsjRI0lztYjkYrVtMSwkVFm3k9/LHG0hwoqzhZLqJmIAB5pNVFjC0jDcgrVPEGn6hAY3tXDfpb48mlqzX9sAM+sV4p+hE0SxoFdx6iPgU3qVTnnFYNM22Mr8nJrR9TttOJka2Mkn+xParfxL99ujWIx4GSc5rWFE0ibG5Hc1JbvGm44xnrJKkS7nbaK0zULM3SgToSQQBVyFjUyHtnsKl1AvbtECcHyWls1zOsYYAHux9hUEum6JvP1BPOw4x7Ve3c+oXX1GGSeFX4r7ezt7XdMg4UA1K6lmEa7VJrnpaXZtt5A5YYqCYTyYOa1m/tLaJUdsMT2qC/t532oST01JQYRn5r7O4EgaBCcHIxVlqF1NZGC5iIkXsxoZNZ6E4pZXjI2sRng0SS3POas+LqHnHNahJM0EZeQEFyDisjk1njNE9I7l4Fdo1y2CBV3aajPK009aaipMAPjpLEsqFWFWkTRSOp/jotY6E5FEE7axyDQ4YMDyKW3aawDg/wBLEkV7EUB6aI7dBnNXCF4mUdzVtbLCozy3ufKBjrgYx5IpyiOhJwVIrH+O/8QAPBAAAgEDAQQGCAMHBQEAAAAAAQIDAAQREgUTITEQFCJBUXIjMjM0QlJhcSAwgRU1QENikaEkUFOCsXP/2gAIAQEAAT8C/gnuIk5vxoXcR8f7UGDcj/sUszyybmH/ALN4VFbRR92T4msDwoxjmvA0pJ58/wDYLmTdwSN4CrKPRAvi3E/gPMGt4g+IUGU8j/HX4zayVAcxR+UdLMFBJr0s/fpTNC0i8KNonwErUcro+iT9D/GuodWU99Wb6M27+svL6jpm7cip3czS8/oOmaPWhqBy0Yzz5HpJA761r41rXx/M2nK8caFT8VC4kPxmt9L85q0vPgc/Y/k3UQaWM5weWaWadODpq+q0LpCcYbP2pQzzNnhwFY/BB/M856JpViUsalneRsk1qPiaeY8gTUXsk8o/L2v7FPNSsVNA56LO65I/6fkXg9FnwNRTMjg5q3HZ1nm1OQjhjyPD8DnAJqJcL/mpJBGpJqeZpWz3dDvjh0Q+yTyj8lpMNitZq9iaeLA5imBU4PCtlxrJI4Yd1dVg+QV1aH5B+Ret6Iioxl1H1pRgAVe9poI883ocKzTzorBe/wAK06ufQVU8xW7T5RW7T5RUvtZPMatbUzHJ9WhwAFF8d9RNqTP47n16R+49F3aCUZHrVslSs8oPy/kySqik5qSRnbJqzt/jYfbourxhdkgepkCkup1fVrOaW9mmVViTtY7TdwqG2WM6jxc8z+KO1aad8+rqNIiooAFE4pmzVv7P8PWo9TL3iuspUrh24dEOCmTWqH51/vQa1D6g65x40rK3Jgfx3chPo0599RwSScziobaFe/Uei6uFgjJ7+6mYsSTzNW8AlY5fSB31B1dFWNGXp3ifOKByMg9IRRyFaRU/r9CTlVxiutHwq2ut+X/p6bl2S8kI8ailEi56UiWWBkbkauV3c8iDOA1DZEclujKxDFc0ks9nPjOCp4ioJRNEkg7x+E0L+CW4EaIcs2Ca2rEvVWcesMVsPJllJPw9G1yN0nmp7VkjickYeobREtGVgDkE1s332H79BANbWQR3WF4DTVmMWsPkH4Z/X6bi41dleXfWyP536dN77zL96jkKNkVFC0iK/iK6s9QxlF41e+9zec1b+wi8graHpb+QR8e6t82z7aNTEWAXifrS7YTcu5XBBwB41s+9N0rkrjSal2id7uoYi7f4o7Vlhl3dxEB9quZ2WDXEmvPKrZ3W5R1XJzyq8Z32Y7Oulscq2NKkXWGc4GKbbiiT2fYq+lS5tVljPAHjU5uOrQ6wNHw1AT1JSf8AjqykWK6jduQNXG1LpcMsGlfE1s+/60rAjDCtue9L5KbaMcFtEB2m0DgKtttK7BZRj6itQxmuuXc0uiGLSPmahtWeGfdXCjnzFPCJDqzXVR81bRUxKoB9bo2R/O/Tp2jZHJlTj4jos/dovL03nvc3nNKl9JCqhlRdI+9WlhDb8ebfMa2x7k33FbFhRxMWGe6rW1itUIXv50+0V3u6gi3jVtOczSrmIoQMHNWX7vi8lbNH+vi+5rafuM32rYsKSSyFhnAratrEbZpAuGWtjpvOsp3FKv1KWdup7qUqbTs8tFWEYkvIlPLNXkYe1lX+mtik9bI8UNbb95XyVZwRpbR4UcVGa2rAkNz2eTDNWzaLKJnPJBmk2jNcORbQ5A7zV9I8l0xdNLcOFQ+xj8o6Nsfyv1qCB5n0qKt4EgTSP1P4L2wxmSPl3irT3aL7dN371N5zUHsYvKOjbPuZ8wrYPqTfcVtJ3SzlK1sIx5lB9etu43sXlq1/d8f/AM62cypexljgca2i6ts+Uqcg1sL1pvsK2xJps2HzHFbDTEMj+LVtcehTzVY3DLII/hfhioD1a+Gr4X41dzIlpI+oerwrYtsy6pmHPgK2172PJVt7CLyCtptvb/T9lra4ZLEBeWQDWxZY9yyfFqrazK14cHOBUXso/KOi/gad4VX65NQQJCmlfxAAdL7FZ5Xcy8znlUa6I1XwGOi8tetRaNWOOasbEWmvD5zTorqVbka/YpWXVHNgVPsgSlfSn6nvNWtu0CaDJqHdX7GiNwWz2Plqe1SS33I7K1Z2CWurDE6qvbIXQQF8Yq0surDAkYjwraAzb4/qFRRom01VeQFXmzYrk6vVbxqDZUSY1sXx3HlQAHKrnZsVxLvGY0ihECjuGKOyYTKZNbZLZrcqYt23aH1obFiD5EjYqXZEEj5yQMcqgi3KadRP3/MuLiO3TW+cUNoQ7t3w4C+Irr8G6STJwzYFTX8UTlMMxAycd1ddg9BjJ3vq1JcJFJEjZy54VJtSBHZcNgHDN3Cutxb/AHXHOnVVtcJcR608cUl/C9yYMHUKTaMLXDQgHIz/AIqHaSzMumGTGcZ7qO1I1LjdvhWwzUbyPfRR894uQa69E1vJNpOEbFG7tYbhG0NqlUHPhmp9oxwzrEVJJx/mp5kgiaRuQqDaAkfQ0bIdOofal2opZPRMEZsB6F+p6z2D6Hn9abaKiKAqhLS+qtR7RjMMzsukx+sKg2hrlRHiKaxlPrVrdC5EmFxpbH5u2fdP+4q6W4Gz5d7IrcFxinzEVg7jIjr+tIzLc7RwoLY5HwreB/2a+kKNZ5cqvSDeWHH46kYQNLLCwkiL+kQ+NSCWTaJ3L6PQj+1bF9zPnNE7u5nn+S4/9q0XFzAT8ccjf3rZSy7tSJ8LrPY8aVkFvtPJHrmogRcbNz/xUjKNmXak8d7VxHreFe/qn/lFjMRP4yxr/ar7c9WfferUMkiu9uWEg3RKN3irO6gjsrdWGTqxijG7SbSIkK6eY8aj7L7LY8tJ4041ptRl9XUKZ0kudm6DnC8a2VNEu/VnAJlOPzbi3juE0Scs0NnW4R07WG58aksoJDGzDinKprG3mfWQc/Sm2fasiIU4LypbC3Td4X1DkUdnWjSF9HHOa6vFvTLp7WMVDBHAmlBgZo2duRKCntPWoWsAZW0equkfal2daIwYR8QaOz7TUXMQznNJ1SaRHXBZBwNGys3cybsZz/mjBEZA+jtYx+ldUtggXdjAbV+tOiupVhkGorWCHO7jAoWlssm8EQ1eNbm37fZHpOf1pobUhIWUf0iokg3ZWNRp5EVFb28Z1Roorqltq1bpc5z/ABDuqKSTwozxHhq5nFW87pZLpUZ5D9TSTyxJJxHxHOOZ1VvbnS5Lc25Y4jjWZpAXJPshw/WjPddoL9e7lg1vJzbzfOpOOHhW9uZ8Bk09peGKjEsYjYZysbHiPrV6GCRyquWRs02/gEAXV3Z8Mk8c1vJ4Y2xkDtY4d+qjPdekHa5+H1qHVuk1HJx/EYrA8KwPDoxWPzv/xAAqEAEAAgIBAwMDBAMBAAAAAAABABEhMUEQUWEgcYEwkfBAobHRweHxUP/aAAgBAQABPyGulda+riy8Ns5seVQqyT/wmiVX/NAMd5mZ4kE/YoZWA3/4Hclag+8vy+gBI733JpV/XN4Zf2YDjX+Dq4GCNgi0O7KeU/MNlDwwJz/P+js7zHf6OkgI/MTWL1gZ5podQic7HzEXR9w67Sk8CeDL+mjAujD7PuT/ALEyGdC/oXxah4eIZhPyxFBqcQk4dHMAFHVgp7OgpMZsDg6cXZT8p2+rYCFkJba930GWNgy62u0t8wieBke/HoFyId7bXuzjrlnewme01G+n4zt9H4507AZLItOxslloL9OrgFFei+tNzKwH9IIJmgqcSJ/tE4LfmU7xMNtoG5ZDqcSobQM/50Zn5DvNXDt7xpjgAPiObYUl3fXo9pfk6N8Z15gA0mR8/QWokhgiPnZ/HnTvVK795S/cXMydkbI0fmPpYqis5+ZQGCGbYruafn084tpnjZbLa6XC6dxHcDMl0WkEv2h9adncuxOEHdiOkQitcsHuzc+WypI2VFeNXDlel1Ey/wB0h1BHSdR6Ezc8M2nialaCJl0lTDFM9UVmjN8nW5SzNYgrLIIf4vhFgdBwM79F6VQvaUsaSwY6DRHzLOH/AG6AOsuL2mIaK8XFYKD1cBHTKf2FolT9Jv8Abp3lhbyTX0G2YgcoLp5yIhG+jBRfjUFQsoK7zSMJeUX56DgXTDXmb5CrcR7vJJ9irQ7PMpY9zzl+sN9uY0KAlBL93Mt8fDXKgTkNxG8/pFppyy1BdHO9nzvP2KBn7eGOZli9aJydlXiPsjeIUao/yQZpSeZOTWv1QMvb0N+O7yjTizNKlqc+9nRxe6UPmco60zTs5NR7quQnJubvcJ+xfzMM5UPmDoybO0UJqfebRVT8EOWH+mAbeV+I3jmnxCeQOnhWVvlMR1g+zDwCpMG5H4o9b2T8P26aTB+6eCCf7R60Iibjs8OHU5N+VzP8vEqP5ugTe3VX4ZhJaq9oqwliucWDqg2X2h5QGT36c8Eke2V9oivaGzb8RfMXX4/ZqYxC/dctoKf7Z+1T8b2lmOGWib7JMmgbPkj8QEfifkO3Q7v4BB4+739NQCgx0YGIv+SZzuu3t0K28dqvUCCY+O0B6wpPeZx3fJFnIGfKS0uugmiLDnbhXxGvEZTvdEQFrjme9du7DuXbQeYMXYeamTPCgfKx/gQABQR2LgKPE0jEPiO++bze6lOyygx2QJWAAg0z+X1OQpWC4tJMvDuWn4NczVSJ3TzOeBZBDOwUpx6YMkERw5uKi+4BZeIYxRL4xOVH/E3Bnq4S+nWGiDEOBu0ONaObJzLltMJuygNFpoBYl3wOYv7yNmUX5CCithcxMyafZLb2wWGrJ99yvqWpOhgcBVZljf7GRiqytbCsNc6MxqAltSr7PhWlYCU19kwySYo1X7YRdq/cEcFzWMGRlqIRDN4BguxzuJT8p75R0cB8MzH2vQpxH2gjorTC9uxujcPOJQ/lGP6rW1c2vVKc0wmNXUzRUFqKi/V8lDD2meAjK2ovmgM+0QDVpVV+82vPfvGkl7HljlzWF4uHPDP4nNOK95bIsPkkGwuKrpWDLuJcEkveDDaA4IpF2eyLkUrfLiY5Kg7d0HuLIxpIu3mV4bfdAk5dM1G/8MHTNSauPFjiyBUc0rn9RQGG2Wxs0cO6uBIdi74LSVaxYeBR7ZAOp/kRY6uhjjLzm1FGsAipHCvlGZQBfI3f2mlbe72yhPVDkcM4hTCQgIhg9mf9I3Q7OAcPiJIlG1Kf09DKdoHoEx1SpRKdpTt0olEqVKJR6//EACkQAQACAgEDAwMFAQEAAAAAAAEAESExURBBYSBxgTCRsUDB4fDxodH/2gAIAQEAAT8QRKlJUolJX07iVLw/gIgB4QEO1UZIfTv9LbmfIIAHHlDSK5yF5VipShxRO/N3gPuRSFih+5BeZb+uUH8gcEV0weRlho6VNSLw+0xBvcQ6/YkZbRB9V/SuW/TrLYL2Bi12qmDR0BoCrG1ACuuFo7yqYg3VlQdjCuzWDdZ62zMv6inPQXwS/oBFfx0izLGzpWxIaOl60P2jRAiEBRWrholE01J4QyRyNv2FnaLNFe5n+nOf7sLFwcH0kXoUQO3ydHlbUqE/DCwIjx62WHW9vvgRXdZr94XlK2+yHcqB3RWFwoCiBg6UzBp6US0gkCtHdZlgClmErzZhd1otx262v40D6WX9mmXg0uSC9UsNzuj0sHB6mprhC8VFA5cpw3GxTmvh0SkQLPlcU0dVc0Q+3/ctx8sDByx1aBZoqpwx322bbgP6+kv12ytbV2GPbSV+Y3ykUyvJuHRLAwmGlIgGgo9FpbF8QjRSJSh9mLAtoQIA5trODBjGB/qDWAlKn8nlHApLJABUFCRumf5qUX8UIFgCA7Z/FRHmfDAjOTdFR9n1XLCEnTOrD0HMDa/BiXa5PEGvWAtlpUmLiKKpRx4mTxFu3mELVYD2Lc2zE4KxlwslCoHQG/hcdMddGOcLz9akDMegI/T2IjXwRr7v5Q6jGvLWddJNEApmDTEezFZoCX6b3Mq3mmYlABWwYelcsCMwqNURYbEc+4PoQttGoAUBLqxPcwa61LysJrqc57R+egoGluVEDKASyKecUGCa0WPSo8AKw5cr0ioLgwJYIDYBW5ZglWt6gl4hA7vrXFTM5KhRw+SQUbgiXG3vCxUe2udWgmQT6bakTSVLZEF2g0cPc9INaCvxMdFsMDAMKPFEOumTKu+hCF8wAS/jx7LvKe9TsVMJGhcM6C3YInN9LHaHi1+51uOBjpoMtyyktH/kakzdPef9knQGaS2YVZyRLSAHtAMzSYW2JZy7mfFfgwnU+dxKYC2StAXUX6Lbuwh9aEViRSKOPTZ2qVUuhgn38Bwkp8PeA1tINnf9ZaeDS2nGkYz3Z7xIyh3DEtYzf8hKqoMsJR/mo4VRT0IK80k1nbkwssgY26zocF3PlZV4lxtSiKQmJauVV6EEropWkYfwkR4mVrUKYEeHS8RJyHP7xAtsQB7aBHFwrJLspDXkiVz86MYLuy1S6kYXJKvkqRwiNWfCQmQU9rSY/wBbCDDHa61DT+A6uGzu4HV2DNRvdgjGGFeJOAlR+UHW/CpuH1agm/bRpBRpaotjsMoHUKlXBFUssRaUMqjQeXCyd5/Y9KfLDTHPjIf+cKbkalETAQU3HJKyPbyQ07cGBGLykWr7/iykoLhxYp4VK0OyAwbht82X3bs0I96ph0FqGvoNXTgAHM8ONS+DKgYyPuRilF8mIJQ5CX9ktoQkNV7Gio4e07hR3DsuI/1nGXvsJiDpTPEh1rxuFiOOBzmNA1+2gXMOAX2MUIbz3Vyyh9CERILMDR0Gy9wFKMHJPjgJdavoAMlAIAx2m6VBmX/ChCCrGJgYFUWU3JCKJNste9FxuCV0OHugGvEq96CORA2goQBsY/JFkZUxQANOEb5alPfIG2wQaviROCADAEwU61FEWy3S7oVND8AFK3LxmKPIg+7rDFbGEhDVw3odjoheur67/iveWx3vLWw6xctOmqzG1TEWeYfzQ3NHH3C5fU5gsgVVXdrUN5YOWq3AMqrzhXQ9hdlFug1LIzULLRK2C2ZCc4xl0mgoLLfakwbVWRqshVhcAydXGgI9zUaNq6CZLT2YZcfHq7UXjBvaiQ43aRpLCPytHAEtHmCQBccJZbthDor6Rw6FgE0YTpjX32LFEh7q+DApvJqAEM1bXIhyqi/Gjjk62zJLZCk75I2vnUKrPXmJgfhLQerd0FiXC/UpUhumSYfqVF3ApDD3ryLDvRMDalwwqL4Do2hentT+9TU35c5xAl+3QQ1ybZAL2oZ3IsoHf1p/MlfFArRmKGCoXCb+ZoZiXJOz6+KR7FtAxJNsbc1IagaLHzSDES+C/GNLyszuK2LK3MsYW5es4pSQhojmIRaQmKOyyyMoiGqplg8xx5CX9ry8YGADyt/BNXlArGY8U7EcWyyD3KG0Bok81Nr94yXVWNbtQ0kcchhGMcBUyZAA3d1y36tHWiUeiiUTYu+yUnqBRevqEOVVbu0GkqG1wjYTTL+cmNFeMVUB6fd0+PvRMarVy7fmyOURvVOQ1rMMq4dq3y+IbhurBWkp87sQ6oWACnaitnfDCu9d7Qnw7OlUs99wvo5MHlOz0v8ASoKS5n0uW+c4KldJ2uqK5nggIADxAVaW7ZRPBHiiIh7EWMk3YlHq/9k=';
+
+const USERS = {
+  principal: {email:'principal@prathibha.edu', pass:'admin123', name:'DV.Srinivasa Rao', role:'Principal'},
+  teacher:   {email:'teacher@prathibha.edu',   pass:'teacher123', name:'Mrs. Noorjahan', role:'Teacher'},
+  parent:    {email:'parent@prathibha.edu',     pass:'parent123',  name:'Mr. Venkata Rao', role:'Parent'}
+};
+
+let currentUser = null;
+let currentRole = 'principal';
+let editStudentId = null;
+
+// ============================================================
+// DATABASE (localStorage)
+// ============================================================
+const DB_KEYS = { students:'phs_students', payments:'phs_payments', feeStructures:'phs_feeStructures', meta:'phs_meta' };
+
+const SEED_STUDENTS = [
+  {id:1, admNo:'PHS001', name:'Arjun Reddy',    father:'Ravi Reddy',    mother:'Sunita Reddy',   cls:'5th',  section:'A', mobile:'9876543210', address:'Visakhapatnam',  admDate:'2020-06-01', acYear:'2024-25'},
+  {id:2, admNo:'PHS002', name:'Priya Sharma',   father:'Suresh Sharma', mother:'Kavitha Sharma', cls:'3rd',  section:'B', mobile:'9876500001', address:'Marripalem',     admDate:'2022-06-01', acYear:'2024-25'},
+  {id:3, admNo:'PHS003', name:'Sai Kiran',      father:'Narayana',      mother:'Vasantha',       cls:'8th',  section:'A', mobile:'9876500002', address:'MVP Colony',     admDate:'2018-06-01', acYear:'2024-25'},
+  {id:4, admNo:'PHS004', name:'Divya Lakshmi',  father:'Mohan Rao',     mother:'Revathi',        cls:'1st',  section:'A', mobile:'9876500003', address:'Visakhapatnam',  admDate:'2024-06-01', acYear:'2024-25'},
+  {id:5, admNo:'PHS005', name:'Rahul Varma',    father:'Anil Varma',    mother:'Geetha Varma',   cls:'10th', section:'A', mobile:'9876500004', address:'Seethammadhara', admDate:'2015-06-01', acYear:'2024-25'},
+];
+const SEED_FEE = [
+  {cls:'Nursery', annual:15000, t1:5000,  t2:5000,  t3:5000},
+  {cls:'LKG',    annual:18000, t1:6000,  t2:6000,  t3:6000},
+  {cls:'UKG',    annual:20000, t1:6667,  t2:6667,  t3:6666},
+  {cls:'1st',    annual:25000, t1:8334,  t2:8333,  t3:8333},
+  {cls:'2nd',    annual:26000, t1:8667,  t2:8667,  t3:8666},
+  {cls:'3rd',    annual:28000, t1:9334,  t2:9333,  t3:9333},
+  {cls:'4th',    annual:29000, t1:9667,  t2:9667,  t3:9666},
+  {cls:'5th',    annual:30000, t1:10000, t2:10000, t3:10000},
+  {cls:'6th',    annual:32000, t1:10667, t2:10667, t3:10666},
+  {cls:'7th',    annual:33000, t1:11000, t2:11000, t3:11000},
+  {cls:'8th',    annual:35000, t1:11667, t2:11667, t3:11666},
+  {cls:'9th',    annual:38000, t1:12667, t2:12667, t3:12666},
+  {cls:'10th',   annual:40000, t1:13334, t2:13333, t3:13333},
+];
+const SEED_PAYMENTS = [
+  {id:1, stuId:1, term:'Term 1', amount:10000, date:'2024-06-15', mode:'Cash',          remarks:''},
+  {id:2, stuId:1, term:'Term 2', amount:5000,  date:'2024-10-10', mode:'UPI',           remarks:'Partial'},
+  {id:3, stuId:2, term:'Term 1', amount:9334,  date:'2024-06-20', mode:'UPI',           remarks:''},
+  {id:4, stuId:3, term:'Term 1', amount:11667, date:'2024-06-18', mode:'Cash',          remarks:''},
+  {id:5, stuId:3, term:'Term 2', amount:11667, date:'2024-10-20', mode:'Bank Transfer', remarks:''},
+  {id:6, stuId:3, term:'Term 3', amount:11666, date:'2025-02-14', mode:'Cheque',        remarks:''},
+  {id:7, stuId:5, term:'Term 1', amount:13334, date:'2024-06-12', mode:'UPI',           remarks:''},
+  {id:8, stuId:5, term:'Term 2', amount:13333, date:'2024-10-15', mode:'UPI',           remarks:''},
+];
+
+// --- DB functions ---
+function dbLoad(){
+  const meta = JSON.parse(localStorage.getItem(DB_KEYS.meta)||'{}');
+  if(!meta.seeded){
+    // First time: write seed data
+    localStorage.setItem(DB_KEYS.students,      JSON.stringify(SEED_STUDENTS));
+    localStorage.setItem(DB_KEYS.feeStructures, JSON.stringify(SEED_FEE));
+    localStorage.setItem(DB_KEYS.payments,      JSON.stringify(SEED_PAYMENTS));
+    localStorage.setItem(DB_KEYS.meta,          JSON.stringify({seeded:true, nextStuId:6, nextPayId:9}));
+  }
+  students       = JSON.parse(localStorage.getItem(DB_KEYS.students));
+  feeStructures  = JSON.parse(localStorage.getItem(DB_KEYS.feeStructures));
+  payments       = JSON.parse(localStorage.getItem(DB_KEYS.payments));
+  const m        = JSON.parse(localStorage.getItem(DB_KEYS.meta));
+  nextStuId      = m.nextStuId;
+  nextPayId      = m.nextPayId;
+}
+function dbSave(){
+  localStorage.setItem(DB_KEYS.students,      JSON.stringify(students));
+  localStorage.setItem(DB_KEYS.feeStructures, JSON.stringify(feeStructures));
+  localStorage.setItem(DB_KEYS.payments,      JSON.stringify(payments));
+  localStorage.setItem(DB_KEYS.meta,          JSON.stringify({seeded:true, nextStuId, nextPayId}));
+}
+function dbReset(){
+  if(!confirm('⚠️ This will DELETE all student, fee, and payment data and restore sample data. Your school profile and password settings will be kept. Are you sure?')) return;
+  Object.values(DB_KEYS).forEach(k=>localStorage.removeItem(k));
+  dbLoad();
+  toast('Database reset to sample data ✅');
+  showPage('dashboard');
+}
+
+let students=[], feeStructures=[], payments=[];
+let nextPayId=9, nextStuId=6;
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = () => {
+  document.getElementById('loginLogo').src   = 'data:image/jpeg;base64,' + LOGO_B64;
+  document.getElementById('sidebarLogo').src = 'data:image/jpeg;base64,' + LOGO_B64;
+  document.getElementById('rpDate').valueAsDate = new Date();
+  dbLoad();
+};
+
+// ============================================================
+// AUTH
+// ============================================================
+function selectRole(r){
+  currentRole = r;
+  document.querySelectorAll('.role-tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+}
+function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value.trim();
+  const u = USERS[currentRole];
+  if(email===u.email && pass===u.pass){
+    currentUser = {...u, type:currentRole};
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('userName').textContent = u.name;
+    document.getElementById('userRole').textContent  = u.role;
+    document.getElementById('headerRole').textContent= u.role;
+    document.getElementById('headerUser').textContent= u.name;
+    applyRoleRestrictions();
+    populateDropdowns();
+    showPage('dashboard');
+    toast('Welcome, '+u.name+'! 👋');
+  } else {
+    alert('Invalid credentials. Check demo logins below.');
+  }
+}
+function doLogout(){
+  if(!confirm('Logout?')) return;
+  currentUser=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginPass').value='';
+}
+function applyRoleRestrictions(){
+  const t = currentUser.type;
+  // Settings: Principal (admin) only
+  const settingsNav = document.getElementById('navSettings');
+  if(settingsNav) settingsNav.style.display = (t==='principal') ? 'block' : 'none';
+  // Teacher & Parent: hide add/edit/record-payment/fee-structure actions
+  ['navAddStudent','navFeeStr','navRecordPay','navReceipt'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(t==='parent') el.style.display='none';
+    else if(t==='teacher') document.getElementById('navAddStudent').style.display='block';
+  });
+  if(t==='parent'){
+    // Parent only sees their child's data
+    document.getElementById('navReceipt').style.display='none';
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(p){
+  document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('nav a').forEach(a=>{if(a.getAttribute('onclick')&&a.getAttribute('onclick').includes("'"+p+"'"))a.classList.add('active');});
+  if(p==='dashboard') renderDashboard();
+  if(p==='students') renderStudents();
+  if(p==='feePayments') renderFeeTable();
+  if(p==='feeStructure') renderFeeStr();
+  if(p==='recordPayment') populateStudentSelect('rpStudent');
+  if(p==='receiptGen'){populateStudentSelect('recStudent');renderReceiptPaymentSelect();}
+  if(p==='addStudent'){editStudentId=null;document.getElementById('addStudentTitle').textContent='➕ Add New Student';clearStudentForm();}
+  if(p==='reports') showReport('pending');
+  if(p==='settings') renderSettingsPage();
+}
+
+// ============================================================
+// DROPDOWNS
+// ============================================================
+function populateDropdowns(){
+  const classes=['Pre-KG','LKG','UKG','1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+  ['stuClassFilter','feeClassFilter'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.innerHTML='<option value="">All Classes</option>';
+    classes.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;el.appendChild(o);});
+  });
+}
+function populateStudentSelect(elId){
+  const el=document.getElementById(elId);
+  el.innerHTML='<option value="">Choose Student</option>';
+  students.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.admNo+' - '+s.name+' ('+s.cls+')';el.appendChild(o);});
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getFeeStr(cls){ return feeStructures.find(f=>f.cls===cls)||null; }
+function getStudentPayments(sid){ return payments.filter(p=>p.stuId===sid); }
+function getTotalPaid(sid){ return getStudentPayments(sid).reduce((a,p)=>a+p.amount,0); }
+function getAnnualFee(cls){ const f=getFeeStr(cls); return f?f.annual:0; }
+function getBalance(sid,cls){ return Math.max(0,getAnnualFee(cls)-getTotalPaid(sid)); }
+function getMonthlyFee(cls){ const f=getFeeStr(cls); return f?Math.round(f.annual/12):0; }
+function getStatus(sid,cls){
+  const paid=getTotalPaid(sid), total=getAnnualFee(cls);
+  if(paid<=0) return 'Not Paid';
+  if(paid>=total) return 'Fully Paid';
+  return 'Partially Paid';
+}
+function statusBadge(s){
+  if(s==='Fully Paid') return '<span class="status paid">✅ Fully Paid</span>';
+  if(s==='Partially Paid') return '<span class="status partial">⚠️ Partially Paid</span>';
+  return '<span class="status unpaid">❌ Not Paid</span>';
+}
+function fmt(n){ return '₹'+Number(n).toLocaleString('en-IN'); }
+function toast(msg,dur=3000){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  setTimeout(()=>{t.style.display='none';},dur);
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function getTermPaid(sid, term){
+  return payments.filter(p=>p.stuId===sid&&p.term===term).reduce((a,p)=>a+p.amount,0);
+}
+function termBadge(paid, due){
+  if(!due) return `<span class="term-badge term-na">— N/A</span>`;
+  if(paid<=0) return `<span class="term-badge term-unpaid">❌ Not Paid<br><small>${fmt(due)}</small></span>`;
+  if(paid>=due) return `<span class="term-badge term-paid">✅ Paid<br><small>${fmt(paid)}</small></span>`;
+  return `<span class="term-badge term-partial">⚠️ Partial<br><small>${fmt(paid)}/${fmt(due)}</small></span>`;
+}
+
+function renderDashboard(){
+  const totalStu = students.length;
+  const totalFee = students.reduce((a,s)=>a+getAnnualFee(s.cls),0);
+  const totalPaid = students.reduce((a,s)=>a+getTotalPaid(s.id),0);
+  const pending   = totalFee - totalPaid;
+
+  document.getElementById('statCards').innerHTML=`
+    <div class="stat-card"><h3>Total Students</h3><div class="value">${totalStu}</div><div class="sub">Enrolled 2024-25</div></div>
+    <div class="stat-card green"><h3>Total Collected</h3><div class="value">${fmt(totalPaid)}</div><div class="sub">This academic year</div></div>
+    <div class="stat-card red"><h3>Pending Fees</h3><div class="value">${fmt(pending)}</div><div class="sub">Yet to collect</div></div>
+    <div class="stat-card orange"><h3>Total Annual Fees</h3><div class="value">${fmt(totalFee)}</div><div class="sub">All students</div></div>
+  `;
+
+  // Term summary cards
+  const t1Col = payments.filter(p=>p.term==='Term 1').reduce((a,p)=>a+p.amount,0);
+  const t2Col = payments.filter(p=>p.term==='Term 2').reduce((a,p)=>a+p.amount,0);
+  const t3Col = payments.filter(p=>p.term==='Term 3').reduce((a,p)=>a+p.amount,0);
+  const t1Due = students.reduce((a,s)=>{const f=getFeeStr(s.cls);return a+(f?f.t1:0);},0);
+  const t2Due = students.reduce((a,s)=>{const f=getFeeStr(s.cls);return a+(f?f.t2:0);},0);
+  const t3Due = students.reduce((a,s)=>{const f=getFeeStr(s.cls);return a+(f?f.t3:0);},0);
+  const t1Pct = t1Due?Math.round(t1Col/t1Due*100):0;
+  const t2Pct = t2Due?Math.round(t2Col/t2Due*100):0;
+  const t3Pct = t3Due?Math.round(t3Col/t3Due*100):0;
+  const t1Paid = students.filter(s=>getTermPaid(s.id,'Term 1')>=(getFeeStr(s.cls)?getFeeStr(s.cls).t1:1)&&getFeeStr(s.cls)).length;
+  const t2Paid = students.filter(s=>getTermPaid(s.id,'Term 2')>=(getFeeStr(s.cls)?getFeeStr(s.cls).t2:1)&&getFeeStr(s.cls)).length;
+  const t3Paid = students.filter(s=>getTermPaid(s.id,'Term 3')>=(getFeeStr(s.cls)?getFeeStr(s.cls).t3:1)&&getFeeStr(s.cls)).length;
+
+  document.getElementById('termStatCards').innerHTML=`
+    <div class="stat-card" style="border-color:#3b82f6;background:linear-gradient(135deg,#eff6ff,#fff);">
+      <h3 style="color:#1e40af;">📘 Term 1</h3>
+      <div class="value" style="color:#1d4ed8;">${fmt(t1Col)}</div>
+      <div class="sub">Due: ${fmt(t1Due)}</div>
+      <div style="margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px;"><span style="color:#1e40af;font-weight:600;">${t1Pct}% collected</span><span style="color:#2e7d32;">${t1Paid}/${totalStu} students paid</span></div>
+        <div style="height:8px;background:#dbeafe;border-radius:4px;overflow:hidden;"><div style="height:100%;width:${t1Pct}%;background:#3b82f6;border-radius:4px;"></div></div>
+      </div>
+      <div style="margin-top:6px;font-size:0.75rem;color:#dc2626;">Pending: ${fmt(Math.max(0,t1Due-t1Col))}</div>
+    </div>
+    <div class="stat-card" style="border-color:#22c55e;background:linear-gradient(135deg,#f0fdf4,#fff);">
+      <h3 style="color:#166534;">📗 Term 2</h3>
+      <div class="value" style="color:#15803d;">${fmt(t2Col)}</div>
+      <div class="sub">Due: ${fmt(t2Due)}</div>
+      <div style="margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px;"><span style="color:#166534;font-weight:600;">${t2Pct}% collected</span><span style="color:#2e7d32;">${t2Paid}/${totalStu} students paid</span></div>
+        <div style="height:8px;background:#dcfce7;border-radius:4px;overflow:hidden;"><div style="height:100%;width:${t2Pct}%;background:#22c55e;border-radius:4px;"></div></div>
+      </div>
+      <div style="margin-top:6px;font-size:0.75rem;color:#dc2626;">Pending: ${fmt(Math.max(0,t2Due-t2Col))}</div>
+    </div>
+    <div class="stat-card" style="border-color:#eab308;background:linear-gradient(135deg,#fefce8,#fff);">
+      <h3 style="color:#854d0e;">📙 Term 3</h3>
+      <div class="value" style="color:#a16207;">${fmt(t3Col)}</div>
+      <div class="sub">Due: ${fmt(t3Due)}</div>
+      <div style="margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px;"><span style="color:#854d0e;font-weight:600;">${t3Pct}% collected</span><span style="color:#2e7d32;">${t3Paid}/${totalStu} students paid</span></div>
+        <div style="height:8px;background:#fef9c3;border-radius:4px;overflow:hidden;"><div style="height:100%;width:${t3Pct}%;background:#eab308;border-radius:4px;"></div></div>
+      </div>
+      <div style="margin-top:6px;font-size:0.75rem;color:#dc2626;">Pending: ${fmt(Math.max(0,t3Due-t3Col))}</div>
+    </div>
+  `;
+
+  // Populate dash class filter
+  const cf=document.getElementById('dashClassFilter');
+  if(cf.options.length<=1){
+    [...new Set(students.map(s=>s.cls))].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cf.appendChild(o);});
+  }
+  renderDashTermTable(students);
+
+  // Recent payments
+  const tbody=document.getElementById('recentPaymentsTbody');
+  tbody.innerHTML='';
+  const recentList=[...payments].reverse().slice(0,10);
+  document.getElementById('recentPayCount').textContent=`Total ${payments.length} payment(s) recorded`;
+  recentList.forEach((p,i)=>{
+    const s=students.find(st=>st.id===p.stuId)||{admNo:'—',name:'Unknown',cls:'—'};
+    const balAfter=getBalance(s.id,s.cls);
+    const modeIcon={'Cash':'💵','GPay':'📗','PhonePe':'🟣','UPI':'📲','Credit Card':'💳','Debit Card':'🏧','Bank Transfer':'🏦','Cheque':'📝'};
+    const icon=modeIcon[p.mode]||'💰';
+    const tr=document.createElement('tr');
+    tr.style.animation=`fadeIn .3s ease ${i*0.04}s both`;
+    tr.innerHTML=`
+      <td style="color:#aaa;font-size:0.78rem;">#RCT${String(p.id).padStart(4,'0')}</td>
+      <td><b>${s.admNo}</b></td>
+      <td>${s.name}</td>
+      <td><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${s.cls}</span></td>
+      <td><span class="term-badge ${p.term==='Term 1'?'term-paid':p.term==='Term 2'?'term-partial':'term-unpaid'}" style="font-size:0.75rem;">${p.term}</span></td>
+      <td style="color:#2e7d32;font-weight:700;font-size:1rem;">${fmt(p.amount)}</td>
+      <td style="color:${balAfter>0?'#c62828':'#2e7d32'};font-weight:600;">${fmt(balAfter)}</td>
+      <td style="color:#555;">${p.date}</td>
+      <td>${icon} ${p.mode}</td>
+      <td style="color:#888;font-size:0.8rem;">${p.remarks||'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+  if(!recentList.length){
+    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:#aaa;padding:24px;">No payments recorded yet.</td></tr>';
+  }
+
+  renderCharts();
+}
+
+function renderDashTermTable(list){
+  const tbody=document.getElementById('dashTermTbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  list.forEach(s=>{
+    const fs=getFeeStr(s.cls);
+    const t1p=getTermPaid(s.id,'Term 1');
+    const t2p=getTermPaid(s.id,'Term 2');
+    const t3p=getTermPaid(s.id,'Term 3');
+    const t1d=fs?fs.t1:0, t2d=fs?fs.t2:0, t3d=fs?fs.t3:0;
+    const totalPaid=getTotalPaid(s.id);
+    const balance=getBalance(s.id,s.cls);
+    const status=getStatus(s.id,s.cls);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><b>${s.admNo}</b></td>
+      <td>${s.name}</td>
+      <td><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${s.cls}</span></td>
+      <td style="background:#eff6ff;">${termBadge(t1p,t1d)}</td>
+      <td style="background:#f0fdf4;">${termBadge(t2p,t2d)}</td>
+      <td style="background:#fefce8;">${termBadge(t3p,t3d)}</td>
+      <td style="color:#2e7d32;font-weight:700;">${fmt(totalPaid)}</td>
+      <td style="color:${balance>0?'#c62828':'#2e7d32'};font-weight:700;">${fmt(balance)}</td>
+      <td>${statusBadge(status)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterDashTable(){
+  const q=document.getElementById('dashSearch').value.toLowerCase();
+  const cls=document.getElementById('dashClassFilter').value;
+  renderDashTermTable(students.filter(s=>(s.name.toLowerCase().includes(q)||s.admNo.toLowerCase().includes(q))&&(cls?s.cls===cls:true)));
+}
+
+let charts={};
+function renderCharts(){
+  // Monthly
+  const months=['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  const monthlyData=[85000,12000,5000,3000,45000,8000,2000,38000,15000,7000];
+  mkChart('monthlyChart','bar',months,monthlyData,'Monthly Collection','#1565c0');
+
+  // Class-wise
+  const clsData = feeStructures.map(f=>{
+    const stus=students.filter(s=>s.cls===f.cls);
+    return stus.reduce((a,s)=>a+getTotalPaid(s.id),0);
+  });
+  mkChart('classwiseChart','bar',feeStructures.map(f=>f.cls),clsData,'Collected','#2e7d32');
+
+  // Term-wise
+  const t1=payments.filter(p=>p.term==='Term 1').reduce((a,p)=>a+p.amount,0);
+  const t2=payments.filter(p=>p.term==='Term 2').reduce((a,p)=>a+p.amount,0);
+  const t3=payments.filter(p=>p.term==='Term 3').reduce((a,p)=>a+p.amount,0);
+  mkChart('termChart','doughnut',['Term 1','Term 2','Term 3'],[t1,t2,t3],'',[' #1565c0','#2e7d32','#e65100']);
+
+  // Status
+  const fp=students.filter(s=>getStatus(s.id,s.cls)==='Fully Paid').length;
+  const pp=students.filter(s=>getStatus(s.id,s.cls)==='Partially Paid').length;
+  const np=students.filter(s=>getStatus(s.id,s.cls)==='Not Paid').length;
+  mkChart('statusChart','pie',['Fully Paid','Partially Paid','Not Paid'],[fp,pp,np],'',[' #2e7d32','#e65100','#c62828']);
+}
+function mkChart(id,type,labels,data,label,color){
+  const canvas=document.getElementById(id);
+  if(!canvas) return;
+  if(charts[id]) charts[id].destroy();
+  const isArray=Array.isArray(color);
+  charts[id]=new Chart(canvas,{
+    type,
+    data:{labels,datasets:[{label,data,backgroundColor:isArray?color.map(c=>c+'cc'):color+'cc',borderColor:isArray?color:color,borderWidth:1}]},
+    options:{responsive:true,plugins:{legend:{display:type!=='bar'}},scales:type==='bar'?{y:{beginAtZero:true}}:{}}
+  });
+}
+
+// ============================================================
+// STUDENTS
+// ============================================================
+function renderStudents(list){
+  const src = list||students;
+  const tbody=document.getElementById('studentsTbody');
+  tbody.innerHTML='';
+  if(!src.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#aaa;padding:24px;">No students found</td></tr>';return;}
+  src.forEach(s=>{
+    const status=getStatus(s.id,s.cls);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><b>${s.admNo}</b></td>
+      <td>${s.name}</td>
+      <td>${s.father}</td>
+      <td><span class="badge" style="background:#e3f2fd;color:#0d47a1;">${s.cls}</span></td>
+      <td>${s.mobile}</td>
+      <td>${statusBadge(status)}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="viewStudent(${s.id})">👁 View</button>
+        ${currentUser.type!=='parent'?`<button class="btn btn-primary btn-sm" onclick="editStudent(${s.id})">✏️</button>`:''}
+        ${currentUser.type==='principal'?`<button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id})">🗑</button>`:''}
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+function filterStudents(){
+  const q=document.getElementById('stuSearch').value.toLowerCase();
+  const cls=document.getElementById('stuClassFilter').value;
+  renderStudents(students.filter(s=>(s.name.toLowerCase().includes(q)||s.admNo.toLowerCase().includes(q)||s.mobile.includes(q))&&(cls?s.cls===cls:true)));
+}
+function viewStudent(id){
+  const s=students.find(st=>st.id===id);
+  if(!s) return;
+  const fs=getFeeStr(s.cls);
+  const paid=getTotalPaid(id);
+  const balance=getBalance(id,s.cls);
+  const monthly=getMonthlyFee(s.cls);
+  const status=getStatus(id,s.cls);
+  const pct=fs?Math.round(paid/fs.annual*100):0;
+  document.getElementById('studentModalContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div><b>Adm No:</b> ${s.admNo}</div><div><b>Name:</b> ${s.name}</div>
+      <div><b>Father:</b> ${s.father}</div><div><b>Mother:</b> ${s.mother}</div>
+      <div><b>Class:</b> ${s.cls} – ${s.section}</div><div><b>Mobile:</b> ${s.mobile}</div>
+      <div><b>Academic Year:</b> ${s.acYear}</div><div><b>Adm Date:</b> ${s.admDate}</div>
+      <div style="grid-column:1/-1"><b>Address:</b> ${s.address}</div>
+    </div>
+    <hr style="margin:12px 0;">
+    <h4 style="margin-bottom:10px;color:#1565c0;">💰 Fee Summary</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.9rem;">
+      <div><b>Annual Fee:</b> ${fmt(fs?fs.annual:0)}</div>
+      <div><b>Monthly Fee:</b> <span style="color:#1565c0;font-weight:700;">${fmt(monthly)}</span></div>
+      <div><b>Paid:</b> <span style="color:#2e7d32;font-weight:700;">${fmt(paid)}</span></div>
+      <div><b>Balance:</b> <span style="color:${balance>0?'#c62828':'#2e7d32'};font-weight:700;">${fmt(balance)}</span></div>
+      <div><b>Term 1:</b> ${fmt(fs?fs.t1:0)}</div><div><b>Term 2:</b> ${fmt(fs?fs.t2:0)}</div>
+      <div><b>Term 3:</b> ${fmt(fs?fs.t3:0)}</div><div>${statusBadge(status)}</div>
+    </div>
+    <div class="fee-bar-wrap" style="margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span>Payment Progress</span><span>${pct}%</span></div>
+      <div class="fee-bar"><div class="fee-bar-fill" style="width:${pct}%"></div></div>
+    </div>
+    ${balance>0?`<div class="alert alert-warning" style="margin-top:12px;">⚠️ Balance due: <b>${fmt(balance)}</b>. Monthly installment: <b>${fmt(monthly)}</b>/month</div>`:`<div class="alert alert-success" style="margin-top:12px;">✅ All fees cleared!</div>`}
+    <h4 style="margin:14px 0 8px;color:#1565c0;">📜 Payment History</h4>
+    ${renderPaymentHistory(id)}
+  `;
+  document.getElementById('studentModal').classList.add('open');
+}
+function renderPaymentHistory(sid){
+  const list=getStudentPayments(sid);
+  if(!list.length) return '<p style="color:#aaa;font-size:0.85rem;">No payments recorded yet.</p>';
+  return `<table style="width:100%;font-size:0.82rem;"><thead><tr><th>Term</th><th>Amount</th><th>Date</th><th>Mode</th></tr></thead><tbody>${
+    list.map(p=>`<tr><td>${p.term}</td><td style="color:#2e7d32;font-weight:600;">${fmt(p.amount)}</td><td>${p.date}</td><td>${p.mode}</td></tr>`).join('')
+  }</tbody></table>`;
+}
+function editStudent(id){
+  const s=students.find(st=>st.id===id);
+  if(!s) return;
+  editStudentId=id;
+  document.getElementById('addStudentTitle').textContent='✏️ Edit Student';
+  document.getElementById('fAdmNo').value=s.admNo;
+  document.getElementById('fStuName').value=s.name;
+  document.getElementById('fFather').value=s.father;
+  document.getElementById('fMother').value=s.mother;
+  document.getElementById('fClass').value=s.cls;
+  document.getElementById('fSection').value=s.section;
+  document.getElementById('fMobile').value=s.mobile;
+  document.getElementById('fAddress').value=s.address;
+  document.getElementById('fAdmDate').value=s.admDate;
+  document.getElementById('fAcYear').value=s.acYear;
+  showPage('addStudent');
+  document.getElementById('page-addStudent').classList.add('active');
+}
+function deleteStudent(id){
+  if(!confirm('Delete this student? All payment records will also be removed.')) return;
+  students=students.filter(s=>s.id!==id);
+  payments=payments.filter(p=>p.stuId!==id);
+  dbSave();
+  toast('Student deleted.');
+  renderStudents();
+}
+function clearStudentForm(){
+  ['fAdmNo','fStuName','fFather','fMother','fSection','fMobile','fAddress','fAdmDate'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('fClass').value='';
+  document.getElementById('fAcYear').value='2024-25';
+}
+function saveStudent(){
+  const admNo=document.getElementById('fAdmNo').value.trim();
+  const name=document.getElementById('fStuName').value.trim();
+  const cls=document.getElementById('fClass').value;
+  if(!admNo||!name||!cls){alert('Admission No, Name, and Class are required.');return;}
+  const obj={admNo,name,father:document.getElementById('fFather').value,mother:document.getElementById('fMother').value,cls,section:document.getElementById('fSection').value,mobile:document.getElementById('fMobile').value,address:document.getElementById('fAddress').value,admDate:document.getElementById('fAdmDate').value,acYear:document.getElementById('fAcYear').value};
+  if(editStudentId){
+    const idx=students.findIndex(s=>s.id===editStudentId);
+    students[idx]={...students[idx],...obj};
+    toast('Student updated ✅');
+  } else {
+    obj.id=nextStuId++;
+    students.push(obj);
+    toast('Student added ✅');
+  }
+  dbSave();
+  showPage('students');
+}
+
+// ============================================================
+// FEE STRUCTURE
+// ============================================================
+function autoSplitFees(){
+  const a=parseInt(document.getElementById('fsAnnual').value)||0;
+  const t=Math.floor(a/3);
+  document.getElementById('fsTerm1').value=t;
+  document.getElementById('fsTerm2').value=t;
+  document.getElementById('fsTerm3').value=a-(t*2);
+}
+function loadFeeStr(){
+  const cls=document.getElementById('fsClass').value;
+  const f=getFeeStr(cls);
+  if(f){
+    document.getElementById('fsAnnual').value=f.annual;
+    document.getElementById('fsTerm1').value=f.t1;
+    document.getElementById('fsTerm2').value=f.t2;
+    document.getElementById('fsTerm3').value=f.t3;
+  }
+}
+function saveFeeStr(){
+  const cls=document.getElementById('fsClass').value;
+  if(!cls){alert('Select a class.');return;}
+  const annual=parseInt(document.getElementById('fsAnnual').value)||0;
+  const t1=parseInt(document.getElementById('fsTerm1').value)||0;
+  const t2=parseInt(document.getElementById('fsTerm2').value)||0;
+  const t3=parseInt(document.getElementById('fsTerm3').value)||0;
+  const existing=feeStructures.findIndex(f=>f.cls===cls);
+  const obj={cls,annual,t1,t2,t3};
+  if(existing>=0) feeStructures[existing]=obj;
+  else feeStructures.push(obj);
+  dbSave();
+  toast('Fee structure saved ✅');
+  renderFeeStr();
+}
+function renderFeeStr(){
+  const tbody=document.getElementById('feeStrTbody');
+  tbody.innerHTML='';
+  feeStructures.forEach(f=>{
+    const monthly=Math.round(f.annual/12);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><b>${f.cls}</b></td><td>${fmt(f.annual)}</td><td>${fmt(f.t1)}</td><td>${fmt(f.t2)}</td><td>${fmt(f.t3)}</td><td style="color:#1565c0;font-weight:700;">${fmt(monthly)}/mo</td>
+      <td>${currentUser.type==='principal'?`<button class="btn btn-outline btn-sm" onclick="document.getElementById('fsClass').value='${f.cls}';loadFeeStr();">✏️ Edit</button>`:'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+  // Also show for parent role: hide edit col
+  if(currentUser&&currentUser.type!=='principal') document.getElementById('feeStrForm').style.display='none';
+}
+
+// ============================================================
+// FEE PAYMENTS TABLE
+// ============================================================
+function renderFeeTable(list){
+  const src=list||students;
+  const tbody=document.getElementById('feeTbody');
+  tbody.innerHTML='';
+  src.forEach(s=>{
+    const fs=getFeeStr(s.cls);
+    const annual=fs?fs.annual:0;
+    const paid=getTotalPaid(s.id);
+    const balance=Math.max(0,annual-paid);
+    const monthly=getMonthlyFee(s.cls);
+    const status=getStatus(s.id,s.cls);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><b>${s.admNo}</b></td><td>${s.name}</td><td>${s.cls}</td>
+      <td>${fmt(annual)}</td>
+      <td style="color:#2e7d32;font-weight:600;">${fmt(paid)}</td>
+      <td style="color:${balance>0?'#c62828':'#2e7d32'};font-weight:700;">${fmt(balance)}</td>
+      <td>${statusBadge(status)}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="viewStudent(${s.id})">👁</button>
+        ${currentUser.type==='principal'?`<button class="btn btn-primary btn-sm" onclick="quickPay(${s.id})">💳 Pay</button>`:''}
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  // Populate class filter
+  const cf=document.getElementById('feeClassFilter');
+  if(cf.options.length<=1){
+    const classes=[...new Set(students.map(s=>s.cls))];
+    classes.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cf.appendChild(o);});
+  }
+}
+function filterFeeTable(){
+  const q=document.getElementById('feeSearch').value.toLowerCase();
+  const cls=document.getElementById('feeClassFilter').value;
+  const st=document.getElementById('feeStatusFilter').value;
+  renderFeeTable(students.filter(s=>{
+    const matchQ=s.name.toLowerCase().includes(q)||s.admNo.toLowerCase().includes(q);
+    const matchC=cls?s.cls===cls:true;
+    const matchS=st?getStatus(s.id,s.cls)===st:true;
+    return matchQ&&matchC&&matchS;
+  }));
+}
+function quickPay(sid){
+  document.getElementById('rpStudent').value=sid;
+  showPage('recordPayment');
+  loadStudentFeeInfo();
+}
+
+// ============================================================
+// RECORD PAYMENT
+// ============================================================
+function loadStudentFeeInfo(){
+  const sid=parseInt(document.getElementById('rpStudent').value);
+  const info=document.getElementById('studentFeeInfo');
+  if(!sid){info.style.display='none';return;}
+  const s=students.find(st=>st.id===sid);
+  if(!s){info.style.display='none';return;}
+  const fs=getFeeStr(s.cls);
+  const paid=getTotalPaid(sid);
+  const balance=getBalance(sid,s.cls);
+  const monthly=getMonthlyFee(s.cls);
+  const pct=fs&&fs.annual?Math.round(paid/fs.annual*100):0;
+  info.style.display='block';
+  info.innerHTML=`
+    <div class="fee-detail-card">
+      <h4 style="margin-bottom:12px;">💳 Fee Info: ${s.name} — Class ${s.cls}</h4>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;font-size:0.88rem;">
+        <div><b>Annual Fee</b><br><span style="font-size:1.1rem;color:#1565c0;font-weight:700;">${fmt(fs?fs.annual:0)}</span></div>
+        <div><b>Monthly Fee</b><br><span style="font-size:1.1rem;color:#1565c0;font-weight:700;">${fmt(monthly)}</span></div>
+        <div><b>Total Paid</b><br><span style="font-size:1.1rem;color:#2e7d32;font-weight:700;">${fmt(paid)}</span></div>
+        <div><b>Balance Due</b><br><span style="font-size:1.1rem;color:${balance>0?'#c62828':'#2e7d32'};font-weight:700;">${fmt(balance)}</span></div>
+      </div>
+      <div class="fee-bar-wrap" style="margin-top:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span>Paid ${pct}% of annual fee</span><span>${fmt(paid)} / ${fmt(fs?fs.annual:0)}</span></div>
+        <div class="fee-bar"><div class="fee-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${balance>0?`<div class="alert alert-warning" style="margin-top:10px;">⚠️ Balance due: <b>${fmt(balance)}</b> | Monthly installment: <b>${fmt(monthly)}</b></div>`:
+      `<div class="alert alert-success" style="margin-top:10px;">✅ This student has cleared all fees!</div>`}
+    </div>
+  `;
+}
+function selectPayMode(el, mode){
+  document.querySelectorAll('.pay-mode-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('rpMode').value = mode;
+  const icons = {'Cash':'💵','GPay':'📗','PhonePe':'🟣','UPI':'📲','Credit Card':'💳','Debit Card':'🏧','Bank Transfer':'🏦','Cheque':'📝'};
+  document.getElementById('selectedModeLabel').textContent = '✅ Selected: ' + mode;
+}
+function recordPayment(){
+  const sid=parseInt(document.getElementById('rpStudent').value);
+  const term=document.getElementById('rpTerm').value;
+  const amount=parseInt(document.getElementById('rpAmount').value)||0;
+  const date=document.getElementById('rpDate').value;
+  const mode=document.getElementById('rpMode').value;
+  const remarks=document.getElementById('rpRemarks').value;
+  if(!sid||!term||!amount||!date){alert('Please fill all required fields.');return;}
+  const s=students.find(st=>st.id===sid);
+  const balanceBefore=getBalance(sid,s.cls);
+  if(amount>balanceBefore){
+    const info=document.getElementById('studentFeeInfo');
+    if(info) info.insertAdjacentHTML('beforeend',`<div class="alert alert-warning" style="margin-top:10px;">⚠️ <b>Payment Blocked:</b> Amount entered (${fmt(amount)}) exceeds the balance due (${fmt(balanceBefore)}) by <b>${fmt(amount-balanceBefore)}</b>. Please enter an amount up to the balance due.</div>`);
+    toast(`⚠️ Payment blocked — amount exceeds balance due of ${fmt(balanceBefore)}`);
+    return;
+  }
+  payments.push({id:nextPayId++,stuId:sid,term,amount,date,mode,remarks});
+  toast(`Payment of ${fmt(amount)} recorded ✅`);
+  loadStudentFeeInfo();
+  document.getElementById('rpAmount').value='';
+  document.getElementById('rpTerm').value='';
+  document.getElementById('rpRemarks').value='';
+}
+
+// ============================================================
+// REPORTS
+// ============================================================
+function showReport(type){
+  // Toggle active button
+  ['pending','paid','classwise','termwise'].forEach(t=>{
+    const btn=document.getElementById('rbtn-'+t);
+    if(!btn) return;
+    btn.className = t===type ? 'btn btn-primary' : 'btn btn-outline';
+  });
+
+  const out=document.getElementById('reportOutput');
+  if(type==='pending'){
+    const rows=students.filter(s=>getBalance(s.id,s.cls)>0);
+    out.innerHTML=`<div class="table-card"><div class="table-header"><h3>⏳ Pending Fee Report</h3></div><table>
+      <thead><tr><th>Adm No</th><th>Name</th><th>Class</th><th>Annual Fee</th><th>Paid</th><th>Balance</th><th>Monthly Due</th><th>Status</th></tr></thead>
+      <tbody>${rows.map(s=>`<tr><td>${s.admNo}</td><td>${s.name}</td><td>${s.cls}</td><td>${fmt(getAnnualFee(s.cls))}</td><td style="color:#2e7d32;">${fmt(getTotalPaid(s.id))}</td><td style="color:#c62828;font-weight:700;">${fmt(getBalance(s.id,s.cls))}</td><td style="color:#1565c0;font-weight:700;">${fmt(getMonthlyFee(s.cls))}</td><td>${statusBadge(getStatus(s.id,s.cls))}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+  } else if(type==='paid'){
+    const rows=students.filter(s=>getStatus(s.id,s.cls)==='Fully Paid');
+    out.innerHTML=`<div class="table-card"><div class="table-header"><h3>✅ Fully Paid Report</h3></div><table>
+      <thead><tr><th>Adm No</th><th>Name</th><th>Class</th><th>Annual Fee</th><th>Total Paid</th></tr></thead>
+      <tbody>${rows.map(s=>`<tr><td>${s.admNo}</td><td>${s.name}</td><td>${s.cls}</td><td>${fmt(getAnnualFee(s.cls))}</td><td style="color:#2e7d32;font-weight:700;">${fmt(getTotalPaid(s.id))}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+  } else if(type==='classwise'){
+    const classes=[...new Set(feeStructures.map(f=>f.cls))];
+    const rows=classes.map(cls=>{
+      const stus=students.filter(s=>s.cls===cls);
+      const totalFee=stus.length*(getFeeStr(cls)?getFeeStr(cls).annual:0);
+      const totalPaid=stus.reduce((a,s)=>a+getTotalPaid(s.id),0);
+      return {cls,count:stus.length,totalFee,totalPaid,pending:Math.max(0,totalFee-totalPaid)};
+    });
+    out.innerHTML=`<div class="table-card"><div class="table-header"><h3>🏫 Class-wise Fee Report</h3></div><table>
+      <thead><tr><th>Class</th><th>Students</th><th>Total Fee</th><th>Collected</th><th>Pending</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td><b>${r.cls}</b></td><td>${r.count}</td><td>${fmt(r.totalFee)}</td><td style="color:#2e7d32;">${fmt(r.totalPaid)}</td><td style="color:#c62828;">${fmt(r.pending)}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+  } else if(type==='termwise'){
+    ['Term 1','Term 2','Term 3'].map(term=>{
+      const list=payments.filter(p=>p.term===term);
+      return {term,count:list.length,total:list.reduce((a,p)=>a+p.amount,0)};
+    });
+    const rows=['Term 1','Term 2','Term 3'].map(term=>{
+      const list=payments.filter(p=>p.term===term);
+      return {term,count:list.length,total:list.reduce((a,p)=>a+p.amount,0)};
+    });
+    out.innerHTML=`<div class="table-card"><div class="table-header"><h3>📅 Term-wise Collection</h3></div><table>
+      <thead><tr><th>Term</th><th>Payments</th><th>Total Collected</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td><b>${r.term}</b></td><td>${r.count}</td><td style="color:#2e7d32;font-weight:700;">${fmt(r.total)}</td></tr>`).join('')}</tbody>
+    </table></div>`;
+  }
+}
+function exportReport(){
+  toast('Export feature: Copy table data or use browser Print (Ctrl+P) to save as PDF 📥');
+}
+
+// ============================================================
+// RECEIPT
+// ============================================================
+function renderReceiptPaymentSelect(){
+  populateStudentSelect('recStudent');
+}
+function previewReceipt(){
+  const sid=parseInt(document.getElementById('recStudent').value);
+  const sel=document.getElementById('recPayment');
+  sel.innerHTML='<option value="">Choose Payment</option>';
+  if(!sid) return;
+  const list=getStudentPayments(sid);
+  list.forEach((p,i)=>{
+    const o=document.createElement('option');
+    o.value=i;
+    o.textContent=`${p.term} — ${fmt(p.amount)} on ${p.date}`;
+    sel.appendChild(o);
+  });
+}
+function updateReceiptPayment(){
+  const sid=parseInt(document.getElementById('recStudent').value);
+  const pidx=parseInt(document.getElementById('recPayment').value);
+  const preview=document.getElementById('receiptPreview');
+  if(!sid||isNaN(pidx)){preview.innerHTML='';return;}
+  const s=students.find(st=>st.id===sid);
+  const list=getStudentPayments(sid);
+  const p=list[pidx];
+  if(!s||!p){preview.innerHTML='';return;}
+  const fs=getFeeStr(s.cls);
+  const totalPaid=getTotalPaid(sid);
+  const balance=getBalance(sid,s.cls);
+  preview.innerHTML=`
+    <div class="receipt" id="receiptDiv">
+
+      <!-- RECEIPT HEADER: Logo + School Name side by side -->
+      <div style="display:flex;align-items:center;gap:16px;padding-bottom:14px;border-bottom:2px dashed #bbb;margin-bottom:14px;">
+        <img src="data:image/jpeg;base64,${LOGO_B64}" alt="Prathibha Logo"
+             style="height:72px;width:72px;object-fit:contain;border-radius:8px;flex-shrink:0;">
+        <div style="flex:1;">
+          <div style="font-size:1.3rem;font-weight:800;color:#1565c0;letter-spacing:0.3px;">${(typeof getSchoolProfile==='function'?getSchoolProfile().name:'Prathibha High School')}</div>
+          <div style="font-size:0.78rem;color:#555;margin-top:2px;">${(typeof getSchoolProfile==='function'?getSchoolProfile().address:'38-40-49 Main Road, Marripalem, Visakhapatnam – 530018')}</div>
+          <div style="font-size:0.75rem;color:#888;margin-top:2px;">Academic Year: ${s.acYear}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:1rem;font-weight:700;color:#0d47a1;border:2px solid #1565c0;padding:4px 12px;border-radius:6px;letter-spacing:1px;">FEE RECEIPT</div>
+          <div style="font-size:0.75rem;color:#888;margin-top:4px;">#RCT${String(p.id).padStart(4,'0')}</div>
+        </div>
+      </div>
+
+      <div class="receipt-row"><span>Receipt No</span><span><b>#RCT${String(p.id).padStart(4,'0')}</b></span></div>
+      <div class="receipt-row"><span>Date</span><span>${p.date}</span></div>
+      <div class="receipt-row"><span>Admission No</span><span>${s.admNo}</span></div>
+      <div class="receipt-row"><span>Student Name</span><span><b>${s.name}</b></span></div>
+      <div class="receipt-row"><span>Father Name</span><span>${s.father}</span></div>
+      <div class="receipt-row"><span>Class & Section</span><span>${s.cls} – ${s.section}</span></div>
+      <div class="receipt-row"><span>Academic Year</span><span>${s.acYear}</span></div>
+      <div class="receipt-row"><span>Term</span><span><b>${p.term}</b></span></div>
+      <div class="receipt-row"><span>Payment Mode</span><span>${p.mode}</span></div>
+      <div style="height:1px;background:#ddd;margin:8px 0;"></div>
+      <div class="receipt-row receipt-total"><span>Amount Paid</span><span style="color:#2e7d32;font-size:1.15rem;font-weight:800;">${fmt(p.amount)}</span></div>
+      <div class="receipt-row"><span>Total Paid (All Terms)</span><span style="color:#2e7d32;font-weight:600;">${fmt(totalPaid)}</span></div>
+      <div class="receipt-row"><span>Balance Due</span><span style="color:${balance>0?'#c62828':'#2e7d32'};font-weight:700;">${balance>0?fmt(balance):'✅ Cleared'}</span></div>
+      ${p.remarks?`<div class="receipt-row"><span>Remarks</span><span>${p.remarks}</span></div>`:''}
+      <div style="margin-top:24px;display:flex;justify-content:space-between;font-size:0.78rem;color:#888;border-top:1px dashed #ccc;padding-top:12px;">
+        <span>____________________<br>Student Signature</span>
+        <span style="text-align:right;">____________________<br>Principal Signature & Seal</span>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;display:flex;gap:10px;" class="no-print">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
+    </div>
+  `;
+}
+</script>
+<script>
+// ============================================================
+// SETTINGS MODULE
+// Prathibha High School - Fee Management System
+// Handles: School Profile, Change Password, Data Backup/Restore/Reset
+// ============================================================
+
+const SCHOOL_PROFILE_KEY = 'phs_schoolProfile';
+const USER_OVERRIDES_KEY = 'phs_userOverrides';
+
+const DEFAULT_SCHOOL_PROFILE = {
+  name: 'Prathibha High School',
+  address: '38-40-49 Main Road, Marripalem, Visakhapatnam \u2013 530018',
+  phone: '',
+  email: '',
+  academicYear: '2024-25'
+};
+
+// --- School Profile ---
+function getSchoolProfile(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(SCHOOL_PROFILE_KEY) || '{}');
+    return Object.assign({}, DEFAULT_SCHOOL_PROFILE, saved);
+  }catch(e){
+    return Object.assign({}, DEFAULT_SCHOOL_PROFILE);
+  }
+}
+function saveSchoolProfile(profile){
+  localStorage.setItem(SCHOOL_PROFILE_KEY, JSON.stringify(profile));
+  applySchoolProfileToUI();
+}
+function applySchoolProfileToUI(){
+  const p = getSchoolProfile();
+  const setText = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
+  setText('loginSchoolName', p.name);
+  setText('loginSchoolAddress', p.address);
+  setText('headerSchoolName', p.name);
+  setText('headerSchoolAddress', `${p.address} | Academic Year: ${p.academicYear}`);
+  document.title = p.name + ' - Fee Management System';
+}
+function saveSchoolProfileForm(){
+  const profile = {
+    name: document.getElementById('setSchoolName').value.trim() || DEFAULT_SCHOOL_PROFILE.name,
+    address: document.getElementById('setSchoolAddress').value.trim(),
+    phone: document.getElementById('setSchoolPhone').value.trim(),
+    email: document.getElementById('setSchoolEmail').value.trim(),
+    academicYear: document.getElementById('setAcademicYear').value.trim() || DEFAULT_SCHOOL_PROFILE.academicYear
+  };
+  saveSchoolProfile(profile);
+  toast('School profile updated \u2705');
+}
+function resetSchoolProfile(){
+  if(!confirm('Reset school profile to the default values?')) return;
+  localStorage.removeItem(SCHOOL_PROFILE_KEY);
+  applySchoolProfileToUI();
+  renderSettingsPage();
+  toast('School profile reset to defaults \u2705');
+}
+
+// --- Password Management ---
+function applyUserOverrides(){
+  try{
+    const overrides = JSON.parse(localStorage.getItem(USER_OVERRIDES_KEY) || '{}');
+    Object.keys(overrides).forEach(role => { if(USERS[role]) USERS[role].pass = overrides[role]; });
+  }catch(e){ /* ignore */ }
+}
+function changePassword(){
+  const cur = document.getElementById('setCurPass').value;
+  const next = document.getElementById('setNewPass').value;
+  const confirmNext = document.getElementById('setConfirmPass').value;
+  const u = USERS[currentUser.type];
+  if(cur !== u.pass){ toast('\u26a0\ufe0f Current password is incorrect'); return; }
+  if(!next || next.length < 4){ toast('\u26a0\ufe0f New password must be at least 4 characters'); return; }
+  if(next !== confirmNext){ toast('\u26a0\ufe0f New passwords do not match'); return; }
+  u.pass = next;
+  const overrides = JSON.parse(localStorage.getItem(USER_OVERRIDES_KEY) || '{}');
+  overrides[currentUser.type] = next;
+  localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(overrides));
+  toast('Password updated \u2705');
+  document.getElementById('setCurPass').value = '';
+  document.getElementById('setNewPass').value = '';
+  document.getElementById('setConfirmPass').value = '';
+}
+
+// --- Data Backup / Restore / Reset ---
+function exportAppData(){
+  const data = {
+    students, feeStructures, payments,
+    meta: { nextStuId, nextPayId },
+    schoolProfile: getSchoolProfile(),
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'prathibha-fee-data-backup.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast('Backup file downloaded \u2705');
+}
+function triggerImportFile(){
+  document.getElementById('importFileInput').click();
+}
+function importAppData(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(!Array.isArray(data.students) || !Array.isArray(data.feeStructures) || !Array.isArray(data.payments)){
+        alert('This file does not look like a valid backup.');
+        return;
+      }
+      if(!confirm('\u26a0\ufe0f This will replace ALL current data with the backup file. Continue?')) return;
+      students.length = 0; students.push(...data.students);
+      feeStructures.length = 0; feeStructures.push(...data.feeStructures);
+      payments.length = 0; payments.push(...data.payments);
+      nextStuId = data.meta && data.meta.nextStuId ? data.meta.nextStuId : (Math.max(0, ...students.map(s=>s.id)) + 1);
+      nextPayId = data.meta && data.meta.nextPayId ? data.meta.nextPayId : (Math.max(0, ...payments.map(p=>p.id)) + 1);
+      if(data.schoolProfile) saveSchoolProfile(data.schoolProfile);
+      dbSave();
+      toast('Backup restored successfully \u2705');
+      showPage('dashboard');
+    }catch(e){
+      alert('Could not read this file. Please choose a valid backup JSON file.');
+    }
+    evt.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// --- Settings Page Render ---
+function renderSettingsPage(){
+  const container = document.getElementById('settingsContent');
+  if(!container) return;
+  const p = getSchoolProfile();
+  container.innerHTML = `
+    <div class="form-card">
+      <h3 style="margin-bottom:14px;color:#0d47a1;">\ud83c\udfeb School Profile</h3>
+      <div class="form-grid">
+        <div class="form-field"><label>School Name</label><input type="text" id="setSchoolName" value="${escapeAttr(p.name)}"></div>
+        <div class="form-field"><label>Academic Year</label><input type="text" id="setAcademicYear" value="${escapeAttr(p.academicYear)}" placeholder="e.g. 2024-25"></div>
+        <div class="form-field" style="grid-column:1/-1;"><label>Address</label><input type="text" id="setSchoolAddress" value="${escapeAttr(p.address)}"></div>
+        <div class="form-field"><label>Phone</label><input type="text" id="setSchoolPhone" value="${escapeAttr(p.phone)}" placeholder="Optional"></div>
+        <div class="form-field"><label>Email</label><input type="email" id="setSchoolEmail" value="${escapeAttr(p.email)}" placeholder="Optional"></div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="saveSchoolProfileForm()">\ud83d\udcbe Save Profile</button>
+        <button class="btn btn-outline" onclick="resetSchoolProfile()">Reset to Default</button>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 style="margin-bottom:14px;color:#0d47a1;">\ud83d\udd10 Change Password</h3>
+      <div class="form-grid">
+        <div class="form-field"><label>Current Password</label><input type="password" id="setCurPass" placeholder="Current password"></div>
+        <div class="form-field"><label>New Password</label><input type="password" id="setNewPass" placeholder="New password"></div>
+        <div class="form-field"><label>Confirm New Password</label><input type="password" id="setConfirmPass" placeholder="Confirm new password"></div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary" onclick="changePassword()">\u2705 Update Password</button>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 style="margin-bottom:14px;color:#0d47a1;">\ud83d\uddc4\ufe0f Data Management</h3>
+      <p style="font-size:0.85rem;color:#666;margin-bottom:14px;">Data is stored locally in this browser. Export a backup regularly, or restore from a previous backup file.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-success" onclick="exportAppData()">\u2b07\ufe0f Export Backup (JSON)</button>
+        <button class="btn btn-outline" onclick="triggerImportFile()">\u2b06\ufe0f Import Backup</button>
+        <input type="file" id="importFileInput" accept="application/json" style="display:none;" onchange="importAppData(event)">
+        <button class="btn btn-danger" onclick="dbReset()">\u267b\ufe0f Reset to Sample Data</button>
+      </div>
+    </div>
+  `;
+}
+function escapeAttr(str){
+  return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// --- Boot: apply saved profile/passwords once the page and main script have loaded ---
+window.addEventListener('load', () => {
+  applyUserOverrides();
+  applySchoolProfileToUI();
+});
+</script>
+</body>
+</html>
